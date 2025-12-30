@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Платформа обучения - IL</title>
+    <link rel="stylesheet" href="styles/platform.css">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>IL Learning Platform</h1>
+                <p>Вход в платформу обучения</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" required autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                    <label for="role">Роль</label>
+                    <select id="role" name="role" required>
+                        <option value="">Выберите роль</option>
+                        <option value="student">Студент</option>
+                        <option value="teacher">Преподаватель</option>
+                        <option value="admin">Администратор</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Войти</button>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+            </form>
+            <div class="login-footer">
+                <p>Нет аккаунта? <a href="#" id="registerLink">Зарегистрироваться</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="dashboard" style="display: none;">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>IL Learning Platform</h1>
+                <span class="user-badge student">Студент</span>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="studentName">Студент</span>
+                    <span class="points-badge" id="studentPoints">0 очков</span>
+                </div>
+                <button class="btn btn-secondary" id="studentLogout">Выйти</button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <!-- Sidebar -->
+            <aside class="dashboard-sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#courses" class="nav-item active" data-section="courses">
+                        <span class="nav-icon">📚</span>
+                        <span>Мои курсы</span>
+                    </a>
+                    <a href="#progress" class="nav-item" data-section="progress">
+                        <span class="nav-icon">📊</span>
+                        <span>Прогресс</span>
+                    </a>
+                    <a href="#grades" class="nav-item" data-section="grades">
+                        <span class="nav-icon">⭐</span>
+                        <span>Оценки</span>
+                    </a>
+                    <a href="#leaderboard" class="nav-item" data-section="leaderboard">
+                        <span class="nav-icon">🏆</span>
+                        <span>Рейтинг</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="dashboard-content">
+                <!-- Courses Section -->
+                <section id="coursesSection" class="content-section active">
+                    <h2>Мои курсы</h2>
+                    <div id="studentCourses" class="courses-grid">
+                        <!-- Courses will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Progress Section -->
+                <section id="progressSection" class="content-section">
+                    <h2>Мой прогресс</h2>
+                    <div class="progress-overview">
+                        <div class="progress-card">
+                            <h3>Общий прогресс</h3>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="overallProgress">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="progress-text" id="overallProgressText">0%</span>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="completedLessons">0</div>
+                                <div class="stat-label">Завершено уроков</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="totalPoints">0</div>
+                                <div class="stat-label">Всего очков</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="averageGrade">0</div>
+                                <div class="stat-label">Средний балл</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Grades Section -->
+                <section id="gradesSection" class="content-section">
+                    <h2>Мои оценки</h2>
+                    <div id="gradesList" class="grades-list">
+                        <!-- Grades will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Leaderboard Section -->
+                <section id="leaderboardSection" class="content-section">
+                    <h2>Рейтинг группы</h2>
+                    <div id="leaderboard" class="leaderboard">
+                        <!-- Leaderboard will be loaded here -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Lesson View -->
+    <div id="lessonView" class="lesson-view" style="display: none;">
+        <header class="lesson-header">
+            <button class="btn btn-secondary" id="backToCourses">← Назад к курсам</button>
+            <h2 id="lessonTitle">Урок</h2>
+            <div class="lesson-progress">
+                <span>Прогресс урока: </span>
+                <div class="progress-bar small">
+                    <div class="progress-fill" id="lessonProgressFill" style="width: 0%"></div>
+                </div>
+                <span id="lessonProgressText">0%</span>
+            </div>
+        </header>
+
+        <div class="lesson-container">
+            <div class="lesson-content">
+                <!-- Lesson content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDashboard" class="dashboard" style="display: none;">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>IL Learning Platform</h1>
+                <span class="user-badge teacher">Преподаватель</span>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span id="teacherName">Преподаватель</span>
+                </div>
+                <button class="btn btn-secondary" id="teacherLogout">Выйти</button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
+            <aside class="dashboard-sidebar">
+                <nav class="sidebar-nav">
+                    <a href="#groups" class="nav-item active" data-section="groups">
+                        <span class="nav-icon">👥</span>
+                        <span>Мои группы</span>
+                    </a>
+                    <a href="#lessons" class="nav-item" data-section="lessons">
+                        <span class="nav-icon">📝</span>
+                        <span>Уроки</span>
+                    </a>
+                    <a href="#assignments" class="nav-item" data-section="assignments">
+                        <span class="nav-icon">📋</span>
+                        <span>Задания</span>
+                    </a>
+                    <a href="#statistics" class="nav-item" data-section="statistics">
+                        <span class="nav-icon">📊</span>
+                        <span>Статистика</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <main class="dashboard-content">
+                <!-- Groups Section -->
+                <section id="groupsSection" class="content-section active">
+                    <h2>Мои группы</h2>
+                    <div id="teacherGroups" class="groups-grid">
+                        <!-- Groups will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Lessons Section -->
+                <section id="lessonsSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Уроки</h2>
+                        <button class="btn btn-primary" id="createLessonBtn">+ Создать урок</button>
+                    </div>
+                    <div id="lessonsList" class="lessons-list">
+                        <!-- Lessons will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Assignments Section -->
+                <section id="assignmentsSection" class="content-section">
+                    <h2>Задания студентов</h2>
+                    <div id="assignmentsList" class="assignments-list">
+                        <!-- Assignments will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- Statistics Section -->
+                <section id="statisticsSection" class="content-section">
+                    <h2>Статистика группы</h2>
+                    <div id="groupStatistics" class="statistics-content">
+                        <!-- Statistics will be loaded here -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard (используем существующую админку) -->
+    <div id="adminDashboard" style="display: none;">
+        <!-- Redirect to admin panel -->
+    </div>
+
+    <!-- Modals -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;">
+        <div class="modal" id="modal">
+            <!-- Modal content -->
+        </div>
+    </div>
+
+    <script src="scripts/platform-api.js"></script>
+    <script src="scripts/student.js"></script>
+    <script src="scripts/teacher.js"></script>
+    <script src="scripts/platform.js"></script>
+</body>
+</html>
+
