@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Опционально: также отправляем в WhatsApp (можно закомментировать)
                 const paymentText = data.payment === 'installment' ? 'Оплата в 2 части (130€ + 130€)' : 'Полная оплата 260€';
                 const whatsappMessage = `Привет! Хочу записаться на курс IL.\n\nИмя: ${data.name} ${data.surname}\nEmail: ${data.email}\nТелефон: ${data.phone}\n${data.message ? 'Сообщение: ' + data.message + '\n' : ''}${paymentText}`;
-                const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(whatsappMessage)}`;
+                const whatsappUrl = `https://wa.me/393513792306?text=${encodeURIComponent(whatsappMessage)}`;
                 
                 // Открываем WhatsApp через 2 секунды (после показа уведомления)
                 setTimeout(() => {
