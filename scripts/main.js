@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const navMenu = document.getElementById('navMenu');
 
     if (navToggle && navMenu) {
-        navToggle.addEventListener('click', function() {
+        navToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
             navMenu.classList.toggle('active');
             navToggle.classList.toggle('active');
         });
@@ -30,6 +31,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 navMenu.classList.remove('active');
                 navToggle.classList.remove('active');
             });
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!navMenu.contains(e.target) && !navToggle.contains(e.target)) {
+                navMenu.classList.remove('active');
+                navToggle.classList.remove('active');
+            }
+        });
+
+        // Close menu on scroll (mobile)
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            if (window.innerWidth <= 968) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(function() {
+                    navMenu.classList.remove('active');
+                    navToggle.classList.remove('active');
+                }, 100);
+            }
         });
     }
 
