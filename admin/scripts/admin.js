@@ -5,11 +5,62 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentUser) {
         showAdminPanel();
         initAdminPanel();
+        
+        // Восстанавливаем состояние после инициализации
+        if (typeof StateManager !== 'undefined') {
+            restoreAdminState();
+        }
     } else {
         showLoginScreen();
         initLogin();
+        
+        // Восстанавливаем данные формы входа
+        if (typeof StateManager !== 'undefined') {
+            StateManager.restoreForm('loginForm');
+            StateManager.autoSaveForm('loginForm');
+        }
     }
 });
+
+// Восстановление состояния админ-панели
+function restoreAdminState() {
+    if (typeof StateManager === 'undefined') return;
+    
+    // Восстанавливаем активную секцию
+    const activeSection = StateManager.getActiveSection();
+    if (activeSection) {
+        setTimeout(() => {
+            const navItem = document.querySelector(`.nav-item[data-section="${activeSection}"]`);
+            if (navItem) {
+                navItem.click();
+            }
+        }, 300);
+    }
+    
+    // Восстанавливаем состояние сайдбара
+    const uiState = StateManager.getUIState();
+    if (uiState.sidebarOpen !== undefined) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+            if (uiState.sidebarOpen) {
+                sidebar.classList.add('open');
+            } else {
+                sidebar.classList.remove('open');
+            }
+        }
+    }
+    
+    // Восстанавливаем фильтры
+    const filters = StateManager.getFilters();
+    if (Object.keys(filters).length > 0) {
+        Object.keys(filters).forEach(filterId => {
+            const filterElement = document.getElementById(filterId);
+            if (filterElement && filters[filterId] !== undefined) {
+                filterElement.value = filters[filterId];
+            }
+        });
+    }
+}
 
 // Login Screen
 function showLoginScreen() {
@@ -59,12 +110,22 @@ function initLogin() {
             API.setCurrentUser(user);
             showAdminPanel();
             initAdminPanel();
+            
+            // Очищаем сохраненные данные формы после успешного входа
+            if (typeof StateManager !== 'undefined') {
+                StateManager.remove('form_loginForm');
+            }
         } else {
             const errorDiv = document.getElementById('loginError');
             errorDiv.textContent = 'Неверный логин или пароль. Используйте: admin / admin';
             errorDiv.style.display = 'block';
         }
     });
+    
+    // Автоматическое сохранение формы при изменении
+    if (typeof StateManager !== 'undefined') {
+        StateManager.autoSaveForm('loginForm');
+    }
 }
 
 // Admin Panel Initialization
@@ -102,6 +163,11 @@ function initNavigation() {
             
             // Show section
             showSection(section);
+            
+            // Сохраняем активную секцию
+            if (typeof StateManager !== 'undefined') {
+                StateManager.saveActiveSection(section);
+            }
         });
     });
 }
@@ -159,6 +225,13 @@ function initMenuToggle() {
     
     menuToggle.addEventListener('click', function() {
         sidebar.classList.toggle('open');
+        
+        // Сохраняем состояние сайдбара
+        if (typeof StateManager !== 'undefined') {
+            const uiState = StateManager.getUIState();
+            uiState.sidebarOpen = sidebar.classList.contains('open');
+            StateManager.saveUIState(uiState);
+        }
     });
 }
 
@@ -298,7 +371,27 @@ function initQuickActions() {
     document.getElementById('addStudentBtn').addEventListener('click', () => showAddStudentModal());
     document.getElementById('addReviewBtn').addEventListener('click', () => showAddReviewModal());
     document.getElementById('addPlatformUserBtn')?.addEventListener('click', () => showAddPlatformUserModal());
-    document.getElementById('platformUserRoleFilter')?.addEventListener('change', loadPlatformUsers);
+    const platformUserRoleFilter = document.getElementById('platformUserRoleFilter');
+    if (platformUserRoleFilter) {
+        // Восстанавливаем сохраненный фильтр
+        if (typeof StateManager !== 'undefined') {
+            const filters = StateManager.getFilters();
+            if (filters.platformUserRoleFilter) {
+                platformUserRoleFilter.value = filters.platformUserRoleFilter;
+            }
+        }
+        
+        platformUserRoleFilter.addEventListener('change', function() {
+            loadPlatformUsers();
+            
+            // Сохраняем фильтр
+            if (typeof StateManager !== 'undefined') {
+                const filters = StateManager.getFilters();
+                filters.platformUserRoleFilter = this.value;
+                StateManager.saveFilters(filters);
+            }
+        });
+    }
 }
 
 // Modal Functions
@@ -548,14 +641,31 @@ function loadStudents() {
     
     // Search functionality
     const searchInput = document.getElementById('studentSearch');
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const rows = tbody.querySelectorAll('tr');
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
+    if (searchInput) {
+        // Восстанавливаем сохраненное значение поиска
+        if (typeof StateManager !== 'undefined') {
+            const filters = StateManager.getFilters();
+            if (filters.studentSearch) {
+                searchInput.value = filters.studentSearch;
+            }
+        }
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+            
+            // Сохраняем значение поиска
+            if (typeof StateManager !== 'undefined') {
+                const filters = StateManager.getFilters();
+                filters.studentSearch = this.value;
+                StateManager.saveFilters(filters);
+            }
         });
-    });
+    }
 }
 
 function showAddStudentModal(studentId = null) {
@@ -694,7 +804,27 @@ function loadPayments() {
         tbody.appendChild(row);
     });
     
-    document.getElementById('paymentFilter').addEventListener('change', loadPayments);
+    const paymentFilter = document.getElementById('paymentFilter');
+    if (paymentFilter) {
+        // Восстанавливаем сохраненный фильтр
+        if (typeof StateManager !== 'undefined') {
+            const filters = StateManager.getFilters();
+            if (filters.paymentFilter) {
+                paymentFilter.value = filters.paymentFilter;
+            }
+        }
+        
+        paymentFilter.addEventListener('change', function() {
+            loadPayments();
+            
+            // Сохраняем фильтр
+            if (typeof StateManager !== 'undefined') {
+                const filters = StateManager.getFilters();
+                filters.paymentFilter = this.value;
+                StateManager.saveFilters(filters);
+            }
+        });
+    }
 }
 
 // Reviews
@@ -853,7 +983,27 @@ function loadMessages() {
         list.appendChild(item);
     });
     
-    document.getElementById('messageFilter').addEventListener('change', loadMessages);
+    const messageFilter = document.getElementById('messageFilter');
+    if (messageFilter) {
+        // Восстанавливаем сохраненный фильтр
+        if (typeof StateManager !== 'undefined') {
+            const filters = StateManager.getFilters();
+            if (filters.messageFilter) {
+                messageFilter.value = filters.messageFilter;
+            }
+        }
+        
+        messageFilter.addEventListener('change', function() {
+            loadMessages();
+            
+            // Сохраняем фильтр
+            if (typeof StateManager !== 'undefined') {
+                const filters = StateManager.getFilters();
+                filters.messageFilter = this.value;
+                StateManager.saveFilters(filters);
+            }
+        });
+    }
 }
 
 // Platform Users

@@ -319,13 +319,7 @@ const API = {
             console.log('Новый пользователь добавлен:', user);
         }
         
-        // Нормализуем email перед сохранением
-        user.email = (user.email || '').trim().toLowerCase();
-        user.password = (user.password || '').trim();
-        
         localStorage.setItem('platform_users', JSON.stringify(users));
-        
-        console.log('Пользователи сохранены в localStorage. Всего:', users.length);
         
         // Проверяем, что данные действительно сохранены
         const savedUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
@@ -335,26 +329,15 @@ const API = {
         );
         
         if (savedUser) {
-            console.log('✅ Проверка сохранения: пользователь найден в localStorage:', {
+            console.log('Проверка сохранения: пользователь найден в localStorage:', {
                 id: savedUser.id,
                 email: savedUser.email,
-                password: savedUser.password ? '*** (длина: ' + savedUser.password.length + ')' : 'ПУСТО',
-                role: savedUser.role,
-                name: savedUser.name
+                password: savedUser.password ? '***' : 'ПУСТО',
+                role: savedUser.role
             });
-            
-            // Выводим всех пользователей для отладки
-            console.log('Все пользователи в системе:', savedUsers.map(u => ({
-                id: u.id,
-                email: u.email,
-                role: u.role,
-                name: u.name
-            })));
-            
             return savedUser;
         } else {
-            console.error('❌ Ошибка: пользователь не найден после сохранения в localStorage');
-            console.log('Все пользователи в localStorage:', savedUsers);
+            console.error('Ошибка: пользователь не найден после сохранения в localStorage');
             return user;
         }
     },

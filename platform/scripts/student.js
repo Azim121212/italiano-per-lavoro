@@ -46,6 +46,11 @@ const StudentDashboard = {
                 item.classList.add('active');
                 
                 this.showSection(section);
+                
+                // Сохраняем активную секцию
+                if (typeof StateManager !== 'undefined') {
+                    StateManager.saveActiveSection(section);
+                }
             });
         });
     },
@@ -175,6 +180,11 @@ const StudentDashboard = {
         // Скрываем дашборд и показываем урок
         document.getElementById('studentDashboard').style.display = 'none';
         document.getElementById('lessonView').style.display = 'flex';
+        
+        // Сохраняем открытый урок
+        if (typeof StateManager !== 'undefined') {
+            StateManager.save('open_lesson_id', lessonId);
+        }
         
         document.getElementById('lessonTitle').textContent = lesson.title;
         
@@ -449,6 +459,11 @@ const StudentDashboard = {
         document.getElementById('lessonView').style.display = 'none';
         document.getElementById('studentDashboard').style.display = 'flex';
         this.loadCourses();
+        
+        // Удаляем сохраненный открытый урок
+        if (typeof StateManager !== 'undefined') {
+            StateManager.remove('open_lesson_id');
+        }
     }
 };
 

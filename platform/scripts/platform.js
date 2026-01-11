@@ -12,13 +12,57 @@ window.addEventListener('DOMContentLoaded', function() {
             // Пользователь уже авторизован
             console.log('Текущий пользователь:', currentUser);
             showDashboard(currentUser.role);
+            
+            // Восстанавливаем состояние после показа дашборда
+            if (typeof StateManager !== 'undefined') {
+                restorePlatformState(currentUser.role);
+            }
         } else {
             // Показываем экран входа
             showLoginScreen();
             initLogin();
+            
+            // Восстанавливаем данные формы входа
+            if (typeof StateManager !== 'undefined') {
+                StateManager.restoreForm('loginForm');
+                StateManager.autoSaveForm('loginForm');
+            }
         }
     }, 100);
 });
+
+// Восстановление состояния платформы
+function restorePlatformState(role) {
+    if (typeof StateManager === 'undefined') return;
+    
+    // Восстанавливаем активную секцию
+    const activeSection = StateManager.getActiveSection();
+    if (activeSection) {
+        setTimeout(() => {
+            if (role === 'student' && typeof StudentDashboard !== 'undefined') {
+                const navItem = document.querySelector(`#studentDashboard .nav-item[data-section="${activeSection}"]`);
+                if (navItem) {
+                    navItem.click();
+                }
+            } else if (role === 'teacher' && typeof TeacherDashboard !== 'undefined') {
+                const navItem = document.querySelector(`#teacherDashboard .nav-item[data-section="${activeSection}"]`);
+                if (navItem) {
+                    navItem.click();
+                }
+            }
+        }, 300);
+    }
+    
+    // Восстанавливаем открытый урок (для студентов)
+    if (role === 'student') {
+        const openLessonId = StateManager.load('open_lesson_id');
+        if (openLessonId && typeof StudentDashboard !== 'undefined') {
+            setTimeout(() => {
+                StudentDashboard.openLesson(openLessonId);
+            }, 500);
+        }
+    }
+}
 
 function showLoginScreen() {
     const loginScreen = document.getElementById('loginScreen');
@@ -115,6 +159,11 @@ function initLogin() {
         if (user && user.role) {
             console.log('✅ Пользователь авторизован:', user.role, user.name);
             showDashboard(user.role);
+            
+            // Очищаем сохраненные данные формы после успешного входа
+            if (typeof StateManager !== 'undefined') {
+                StateManager.remove('form_loginForm');
+            }
         } else {
             // Получаем список пользователей для более информативного сообщения
             const allUsers = PlatformAPI.getUsers();
@@ -127,6 +176,11 @@ function initLogin() {
             }
         }
     });
+    
+    // Автоматическое сохранение формы при изменении
+    if (typeof StateManager !== 'undefined') {
+        StateManager.autoSaveForm('loginForm');
+    }
 }
 
 function showError(message) {

@@ -1,5 +1,19 @@
 // Smooth scrolling and animations
 document.addEventListener('DOMContentLoaded', function() {
+    // Восстанавливаем состояние при загрузке страницы
+    if (typeof StateManager !== 'undefined') {
+        // Восстанавливаем позицию прокрутки
+        StateManager.restoreScrollPosition();
+        
+        // Автоматическое сохранение позиции прокрутки
+        StateManager.autoSaveScroll();
+        
+        // Восстанавливаем данные формы регистрации
+        StateManager.restoreForm('registerForm');
+        
+        // Автоматическое сохранение формы при изменении
+        StateManager.autoSaveForm('registerForm');
+    }
     // Navigation menu toggle
     const navToggle = document.getElementById('navToggle');
     const navMenu = document.getElementById('navMenu');
@@ -295,6 +309,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Reset form
                 this.reset();
+                
+                // Очищаем сохраненные данные формы после успешной отправки
+                if (typeof StateManager !== 'undefined') {
+                    StateManager.remove('form_registerForm');
+                }
             } else {
                 showNotification('Произошла ошибка при отправке заявки. Попробуйте еще раз.', 'error');
             }

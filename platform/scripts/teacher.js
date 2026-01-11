@@ -45,6 +45,11 @@ const TeacherDashboard = {
                 item.classList.add('active');
                 
                 this.showSection(section);
+                
+                // Сохраняем активную секцию
+                if (typeof StateManager !== 'undefined') {
+                    StateManager.saveActiveSection(section);
+                }
             });
         });
     },
