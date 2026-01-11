@@ -1320,6 +1320,27 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 18px;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .modules-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .benefits-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
 @media (max-width: 968px) {
     .content-wrapper {
         grid-template-columns: 1fr;
@@ -1363,6 +1384,7 @@ body {
 
     .nav-actions {
         gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .btn-nav {
@@ -1373,6 +1395,21 @@ body {
     .lang-switcher {
         padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
+    }
+
+    .feature-list li {
+        font-size: 1rem;
+        padding: 0.625rem 0;
+    }
+
+    .pricing-features li {
+        font-size: 1rem;
+        padding: 0.75rem 0;
+    }
+
+    .module-list li {
+        font-size: 0.9rem;
+        padding-left: 1.25rem;
     }
 }
 
@@ -1543,18 +1580,73 @@ body {
         padding: 0 1rem;
     }
 
+    .pricing-features li {
+        font-size: 0.95rem;
+        padding: 0.625rem 0;
+    }
+
     .module-card {
         padding: 1.5rem;
+    }
+
+    .module-card h3 {
+        font-size: 1.5rem;
+    }
+
+    .module-description {
+        font-size: 0.95rem;
+    }
+
+    .module-list li {
+        font-size: 0.85rem;
+        padding-left: 1rem;
     }
 
     .benefit-card {
         padding: 1.5rem;
     }
 
+    .benefit-card h3 {
+        font-size: 1.25rem;
+    }
+
+    .benefit-card p {
+        font-size: 0.95rem;
+    }
+
+    .feature-list li {
+        font-size: 0.95rem;
+        padding: 0.5rem 0;
+    }
+
+    .check-icon {
+        font-size: 1.1rem;
+    }
+
     .footer-content {
         grid-template-columns: 1fr;
         gap: 2rem;
         text-align: center;
+    }
+
+    .footer-section {
+        text-align: center;
+    }
+
+    .social-links {
+        justify-content: center;
+    }
+
+    .text-content .section-title {
+        font-size: 1.75rem;
+    }
+
+    .text-content .section-text {
+        font-size: 1rem;
+    }
+
+    .highlight-text {
+        font-size: 1.1rem;
     }
 }
 
@@ -1581,6 +1673,18 @@ body {
 
     .nav-actions {
         gap: 0.25rem;
+        flex-wrap: nowrap;
+    }
+
+    .btn-nav {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Скрываем кнопку "Записаться" на очень маленьких экранах, оставляем только "Войти" */
+    .nav-actions .btn-nav:not(.btn-login) {
+        display: none;
     }
 
     .btn-nav {
@@ -1738,6 +1842,169 @@ body {
 
     .footer-content {
         gap: 1.5rem;
+    }
+
+    .footer-section h3 {
+        font-size: 1.25rem;
+    }
+
+    .footer-section h4 {
+        font-size: 1rem;
+    }
+
+    .footer-section p {
+        font-size: 0.85rem;
+    }
+
+    .pricing-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+    }
+
+    .pricing-header h3 {
+        font-size: 1.5rem;
+    }
+
+    .price-note {
+        font-size: 0.85rem;
+    }
+
+    .pricing-guarantee {
+        font-size: 0.85rem;
+        margin-top: 1rem;
+    }
+
+    .module-badge {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.75rem;
+        right: 10px;
+    }
+
+    .module-number {
+        font-size: 0.8rem;
+    }
+
+    .testimonials-wrapper {
+        padding: 0;
+    }
+
+    .testimonial-text {
+        font-size: 0.95rem;
+    }
+
+    .testimonial-author {
+        font-size: 0.85rem;
+    }
+
+    .testimonials-note {
+        font-size: 0.85rem;
+    }
+
+    .contact-note {
+        font-size: 0.85rem;
+    }
+
+    .form-note {
+        font-size: 0.85rem;
+    }
+
+    .nav-menu a {
+        font-size: 1rem;
+        padding: 0.75rem 0;
+        display: block;
+    }
+
+    .nav-menu {
+        max-height: calc(100vh - 70px);
+        overflow-y: auto;
+    }
+
+    /* Улучшаем touch targets для мобильных */
+    .btn,
+    .btn-nav,
+    .lang-switcher,
+    .nav-toggle {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Предотвращаем горизонтальный скролл */
+    body {
+        overflow-x: hidden;
+    }
+
+    img,
+    .meme-image {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+/* Очень маленькие экраны (320px и меньше) */
+@media (max-width: 320px) {
+    .container {
+        padding: 0 10px;
+    }
+
+    .logo-icon {
+        font-size: 2rem;
+    }
+
+    .slogan {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .price-amount {
+        font-size: 2rem;
+    }
+
+    .pricing-card {
+        padding: 1.25rem 0.75rem;
+    }
+
+    .module-card {
+        padding: 1rem 0.75rem;
+    }
+}
+
+/* Ландшафтная ориентация мобильных устройств */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header {
+        padding: 3rem 0 2rem;
+    }
+
+    .section {
+        padding: 2rem 0;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1rem 0.5rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
     }
 }
 
