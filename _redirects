@@ -1,0 +1,5 @@
+# Cloudflare Pages redirects
+/admin/* /admin/index.html 200
+/platform/* /platform/index.html 200
+/* /index.html 200
+

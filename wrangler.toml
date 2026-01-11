@@ -1,0 +1,9 @@
+name = "ilearningedelweiss"
+compatibility_date = "2024-01-01"
+
+[env.production]
+routes = [
+  { pattern = "ilearningedelweiss.uk", zone_name = "ilearningedelweiss.uk" },
+  { pattern = "www.ilearningedelweiss.uk", zone_name = "ilearningedelweiss.uk" }
+]
+
