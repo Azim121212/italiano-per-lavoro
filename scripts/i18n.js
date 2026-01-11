@@ -7,6 +7,7 @@ const translations = {
         'nav.testimonials': 'Отзывы',
         'nav.faq': 'FAQ',
         'nav.contact': 'Контакты',
+        'nav.login': 'Войти в кабинет',
         'nav.register': 'Записаться',
         'hero.title': 'IL',
         'hero.slogan': 'Выучите итальянский и получите работу в Италии за 3 месяца',
@@ -128,6 +129,7 @@ const translations = {
         'nav.testimonials': 'Recensioni',
         'nav.faq': 'FAQ',
         'nav.contact': 'Contatti',
+        'nav.login': 'Accedi alla piattaforma',
         'nav.register': 'Iscriviti',
         'hero.title': 'IL',
         'hero.slogan': 'Impara l\'italiano e trova lavoro in Italia in 3 mesi',
@@ -249,6 +251,7 @@ const translations = {
         'nav.testimonials': 'Reviews',
         'nav.faq': 'FAQ',
         'nav.contact': 'Contact',
+        'nav.login': 'Login',
         'nav.register': 'Register',
         'hero.title': 'IL',
         'hero.slogan': 'Learn Italian and get a job in Italy in 3 months',
@@ -379,6 +382,7 @@ function changeLanguage(lang) {
             if (element.tagName === 'INPUT' && element.type === 'submit') {
                 element.value = translations[lang][key];
             } else {
+                // Для всех остальных элементов (включая ссылки) заменяем текстовое содержимое
                 element.textContent = translations[lang][key];
             }
         }
