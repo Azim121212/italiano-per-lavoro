@@ -1,0 +1,842 @@
+/* Trial Lesson Styles */
+.trial-lesson-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    padding: 2rem;
+}
+
+/* Вступительный экран */
+.intro-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.intro-screen.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.intro-content {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+.intro-content h1 {
+    font-size: 2rem;
+    color: #2563eb;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.intro-text {
+    font-size: 1.125rem;
+    color: #4b5563;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+}
+
+/* Блоки урока */
+.lesson-block {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.block-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.block-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #2563eb, #10b981);
+    color: white;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.block-header h2 {
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin: 0;
+}
+
+.instruction {
+    font-size: 1.125rem;
+    color: #4b5563;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+/* Fill in the blanks */
+.fill-blanks {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.blank-item {
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s;
+}
+
+.blank-item.answered-correct {
+    border-color: #10b981;
+    background: #d1fae5;
+}
+
+.blank-item.answered-incorrect {
+    border-color: #ef4444;
+    background: #fee2e2;
+}
+
+.sentence {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #1f2937;
+    font-weight: 500;
+}
+
+.blank {
+    display: inline-block;
+    min-width: 150px;
+    border-bottom: 2px dashed #2563eb;
+    padding: 0 0.5rem;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.options label {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1rem;
+}
+
+.options label:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    transform: translateX(5px);
+}
+
+.options input[type="radio"] {
+    margin-right: 0.75rem;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.options input[type="radio"]:checked + span {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+/* Feedback */
+.feedback {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feedback.correct {
+    background: #d1fae5;
+    color: #065f46;
+    border: 2px solid #10b981;
+}
+
+.feedback.incorrect {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 2px solid #ef4444;
+}
+
+.feedback.info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 2px solid #2563eb;
+}
+
+.feedback-correct::before {
+    content: "✓ ";
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.feedback-incorrect::before {
+    content: "✗ ";
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Диалог */
+.dialogue {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.dialogue-line {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+}
+
+.speaker {
+    font-weight: bold;
+    color: #2563eb;
+    min-width: 30px;
+}
+
+.dialogue .text {
+    flex: 1;
+    color: #1f2937;
+}
+
+/* Sentence Builder */
+.sentence-builder {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.words-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    min-height: 100px;
+}
+
+.word {
+    display: inline-block;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #2563eb, #10b981);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.125rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    user-select: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.word:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.word:active {
+    transform: translateY(0);
+}
+
+.word.used {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: scale(0.95);
+}
+
+.sentence-result {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    border: 2px dashed #2563eb;
+}
+
+.sentence-result p {
+    margin-bottom: 1rem;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.sentence-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 50px;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.sentence-word {
+    display: inline-block;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #2563eb, #10b981);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Text Answer */
+.text-answer {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.3s;
+}
+
+.text-answer:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.hint {
+    background: #dbeafe;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    color: #1e40af;
+    font-size: 0.95rem;
+}
+
+/* Quiz */
+.quiz-progress {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.125rem;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.quiz-question {
+    margin-bottom: 2rem;
+}
+
+.quiz-question h3 {
+    font-size: 1.5rem;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.quiz-option {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.125rem;
+}
+
+.quiz-option:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    transform: translateX(5px);
+}
+
+.quiz-option.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+    font-weight: 600;
+}
+
+.quiz-option input[type="radio"] {
+    margin-right: 1rem;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+}
+
+.quiz-truefalse {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quiz-truefalse .quiz-option {
+    flex: 1;
+    min-width: 150px;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.quiz-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #e5e7eb;
+}
+
+/* Results Screen */
+.results-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.results-content {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    width: 100%;
+}
+
+.results-content h1 {
+    font-size: 2rem;
+    color: #2563eb;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+.results-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 3rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #2563eb, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.results-message {
+    background: #f0f9ff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    font-size: 1.125rem;
+    color: #1e40af;
+    line-height: 1.8;
+}
+
+.results-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb, #10b981);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: white;
+    color: #2563eb;
+    border: 2px solid #2563eb;
+}
+
+.btn-secondary:hover {
+    background: #eff6ff;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.btn-large {
+    padding: 1.25rem 2.5rem;
+    font-size: 1.125rem;
+}
+
+/* Teacher View */
+.teacher-view {
+    background: #f9fafb;
+}
+
+.teacher-header {
+    background: white;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.teacher-header h1 {
+    font-size: 2rem;
+    color: #2563eb;
+    margin: 0;
+}
+
+.teacher-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem;
+}
+
+.teacher-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-section h2 {
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.teacher-section h3 {
+    font-size: 1.25rem;
+    color: #2563eb;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.teacher-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.teacher-section li {
+    padding: 0.75rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: #4b5563;
+    line-height: 1.8;
+}
+
+.teacher-section li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #2563eb;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.teacher-section p {
+    color: #4b5563;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.timing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.timing-item {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.timing-item.total {
+    background: linear-gradient(135deg, #2563eb, #10b981);
+    color: white;
+    font-weight: 600;
+}
+
+.timing-item .time {
+    font-weight: 600;
+    color: #2563eb;
+    min-width: 80px;
+    font-size: 1.125rem;
+}
+
+.timing-item.total .time {
+    color: white;
+}
+
+.timing-item .activity {
+    flex: 1;
+}
+
+.teacher-dialogue {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.dialogue-full {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.correct-answer {
+    background: #d1fae5;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #065f46;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.extra-activities {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.activity-item {
+    background: #f0f9ff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #2563eb;
+}
+
+.activity-item h3 {
+    color: #2563eb;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+.activity-item p {
+    margin: 0;
+    color: #4b5563;
+}
+
+/* Кнопка переключения вида */
+#viewSwitchBtn {
+    transition: all 0.3s;
+}
+
+#viewSwitchBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Анимация для результатов */
+.results-screen {
+    animation: fadeIn 0.5s ease;
+}
+
+.stat-value {
+    animation: countUp 1s ease-out;
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .trial-lesson-container {
+        padding: 1rem;
+    }
+
+    .intro-content,
+    .lesson-block,
+    .results-content {
+        padding: 1.5rem;
+    }
+
+    .intro-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .block-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .block-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .words-container {
+        padding: 1rem;
+    }
+
+    .word {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .results-stats {
+        gap: 2rem;
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+    }
+
+    .quiz-navigation {
+        flex-direction: column;
+    }
+
+    .quiz-navigation .btn {
+        width: 100%;
+    }
+
+    .teacher-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .timing-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prova Gratuita - ILearning</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="trial-lesson.css">
+</head>
+<body>
+    <!-- Student View -->
+    <div id="studentView" class="trial-lesson-container">
+        <!-- Вступительный экран -->
+        <div id="introScreen" class="intro-screen active">
+            <div class="intro-content">
+                <h1>Prova gratuita — Lezione introduttiva di italiano</h1>
+                <p class="intro-text">
+                    В этом пробном уроке ты познакомишься с базовыми фразами для жизни и работы в Италии.<br>
+                    Не переживай — ошибки это часть обучения.
+                </p>
+                <button class="btn btn-primary btn-large" onclick="TrialLesson.startLesson()">
+                    Начать урок
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 1: Знакомство (Fill in the blanks) -->
+        <div id="block1" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">1</span>
+                <h2>Знакомство</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Заполни пропуски, выбрав правильный вариант:</p>
+                <div class="fill-blanks">
+                    <div class="blank-item" data-question="1">
+                        <p class="sentence">Mi chiamo <span class="blank">______</span></p>
+                        <div class="options">
+                            <label><input type="radio" name="q1" value="Marco"> Marco</label>
+                            <label><input type="radio" name="q1" value="lavoro"> lavoro</label>
+                            <label><input type="radio" name="q1" value="tre mesi"> tre mesi</label>
+                            <label><input type="radio" name="q1" value="domani"> domani</label>
+                        </div>
+                        <div class="feedback" id="feedback1"></div>
+                    </div>
+
+                    <div class="blank-item" data-question="2">
+                        <p class="sentence">Vivo a <span class="blank">______</span></p>
+                        <div class="options">
+                            <label><input type="radio" name="q2" value="Messina"> Messina</label>
+                            <label><input type="radio" name="q2" value="lavorare"> lavorare</label>
+                            <label><input type="radio" name="q2" value="posso"> posso</label>
+                            <label><input type="radio" name="q2" value="subito"> subito</label>
+                        </div>
+                        <div class="feedback" id="feedback2"></div>
+                    </div>
+
+                    <div class="blank-item" data-question="3">
+                        <p class="sentence">Cerco lavoro come <span class="blank">______</span></p>
+                        <div class="options">
+                            <label><input type="radio" name="q3" value="cameriere"> cameriere</label>
+                            <label><input type="radio" name="q3" value="tre mesi"> tre mesi</label>
+                            <label><input type="radio" name="q3" value="domani"> domani</label>
+                            <label><input type="radio" name="q3" value="lavorare"> lavorare</label>
+                        </div>
+                        <div class="feedback" id="feedback3"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn1" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 2: Диалог (Interactive dialogue) -->
+        <div id="block2" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">2</span>
+                <h2>Диалог</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Заполни диалог, выбрав правильные ответы:</p>
+                <div class="dialogue">
+                    <div class="dialogue-line">
+                        <span class="speaker">—</span>
+                        <span class="text">Come ti chiami?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">—</span>
+                        <span class="text">Mi chiamo <span class="blank">______</span></span>
+                    </div>
+                    <div class="options">
+                        <label><input type="radio" name="q4" value="Marco"> Marco</label>
+                        <label><input type="radio" name="q4" value="tre mesi"> tre mesi</label>
+                        <label><input type="radio" name="q4" value="lavoro"> lavoro</label>
+                        <label><input type="radio" name="q4" value="domani"> domani</label>
+                    </div>
+                    <div class="feedback" id="feedback4"></div>
+
+                    <div class="dialogue-line" style="margin-top: 2rem;">
+                        <span class="speaker">—</span>
+                        <span class="text">Da quanto tempo sei in Italia?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">—</span>
+                        <span class="text">Sono in Italia da <span class="blank">______</span></span>
+                    </div>
+                    <div class="options">
+                        <label><input type="radio" name="q5" value="tre mesi"> tre mesi</label>
+                        <label><input type="radio" name="q5" value="un anno"> un anno</label>
+                        <label><input type="radio" name="q5" value="lavoro"> lavoro</label>
+                        <label><input type="radio" name="q5" value="domani"> domani</label>
+                    </div>
+                    <div class="feedback" id="feedback5"></div>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn2" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 3: Собери предложение (Drag & Drop) -->
+        <div id="block3" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">3</span>
+                <h2>Собери предложение</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Составь предложение, кликая на слова по порядку:</p>
+                <div class="sentence-builder">
+                    <div class="words-container" id="wordsContainer">
+                        <span class="word" data-word="lavorare">lavorare</span>
+                        <span class="word" data-word="posso">posso</span>
+                        <span class="word" data-word="subito">subito</span>
+                    </div>
+                    <div class="sentence-result" id="sentenceResult">
+                        <p>Твое предложение:</p>
+                        <div class="sentence-words" id="sentenceWords"></div>
+                    </div>
+                    <div class="feedback" id="feedback6"></div>
+                    <button class="btn btn-secondary" onclick="TrialLesson.resetSentence()">
+                        Сбросить
+                    </button>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn3" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 4: Самостоятельное задание (Short answer) -->
+        <div id="block4" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">4</span>
+                <h2>Расскажи о себе</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Напиши короткое предложение о себе на итальянском:</p>
+                <div class="hint">
+                    <strong>Подсказка:</strong> Mi chiamo… / Vivo a… / Cerco lavoro…
+                </div>
+                <textarea 
+                    id="selfIntroduction" 
+                    class="text-answer" 
+                    placeholder="Напиши здесь..."
+                    rows="4"
+                ></textarea>
+                <div class="feedback" id="feedback7"></div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn4">
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Финальный квиз -->
+        <div id="quizBlock" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">5</span>
+                <h2>Финальный квиз</h2>
+            </div>
+            <div class="block-content">
+                <div class="quiz-progress">
+                    <span id="quizProgress">Вопрос 1 из 10</span>
+                </div>
+                <div id="quizContent"></div>
+                <div class="quiz-navigation">
+                    <button class="btn btn-secondary" onclick="TrialLesson.prevQuestion()" id="prevQuizBtn" style="display: none;">
+                        ← Назад
+                    </button>
+                    <button class="btn btn-primary" onclick="TrialLesson.nextQuestion()" id="nextQuizBtn" disabled>
+                        Далее →
+                    </button>
+                    <button class="btn btn-success" onclick="TrialLesson.finishQuiz()" id="finishQuizBtn" style="display: none;">
+                        Завершить квиз
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Результаты -->
+        <div id="resultsScreen" class="results-screen" style="display: none;">
+            <div class="results-content">
+                <h1>Отлично! Ты готов начать обучение в ILearning</h1>
+                <div class="results-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="finalScore">0</div>
+                        <div class="stat-label">Правильных ответов</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="totalQuestions">10</div>
+                        <div class="stat-label">Всего вопросов</div>
+                    </div>
+                </div>
+                <div class="results-message" id="resultsMessage"></div>
+                <div class="results-actions">
+                    <a href="../index.html" class="btn btn-primary">Вернуться на главную</a>
+                    <a href="../platform/index.html" class="btn btn-secondary">Войти в платформу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher View -->
+    <div id="teacherView" class="trial-lesson-container teacher-view" style="display: none;">
+        <div class="teacher-header">
+            <h1>Сценарий пробного урока</h1>
+            <button class="btn btn-secondary" onclick="TrialLesson.switchToStudent()">
+                Переключиться на вид студента
+            </button>
+        </div>
+
+        <div class="teacher-content">
+            <!-- Цели урока -->
+            <section class="teacher-section">
+                <h2>🎯 Цели урока</h2>
+                <ul>
+                    <li>Познакомить студента с базовыми фразами для знакомства</li>
+                    <li>Показать формат интерактивного обучения</li>
+                    <li>Оценить начальный уровень студента</li>
+                    <li>Вовлечь студента в практику и показать, что ошибки — это нормально</li>
+                </ul>
+            </section>
+
+            <!-- Тайминг -->
+            <section class="teacher-section">
+                <h2>⏱️ Тайминг урока</h2>
+                <div class="timing-list">
+                    <div class="timing-item">
+                        <span class="time">5 мин</span>
+                        <span class="activity">Вступительный экран и знакомство</span>
+                    </div>
+                    <div class="timing-item">
+                        <span class="time">10 мин</span>
+                        <span class="activity">Блок 1: Знакомство (Fill in the blanks)</span>
+                    </div>
+                    <div class="timing-item">
+                        <span class="time">10 мин</span>
+                        <span class="activity">Блок 2: Диалог</span>
+                    </div>
+                    <div class="timing-item">
+                        <span class="time">8 мин</span>
+                        <span class="activity">Блок 3: Собери предложение</span>
+                    </div>
+                    <div class="timing-item">
+                        <span class="time">7 мин</span>
+                        <span class="activity">Блок 4: Самостоятельное задание</span>
+                    </div>
+                    <div class="timing-item">
+                        <span class="time">15 мин</span>
+                        <span class="activity">Финальный квиз (10 вопросов)</span>
+                    </div>
+                    <div class="timing-item total">
+                        <span class="time">~55 мин</span>
+                        <span class="activity">Общее время урока</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Блок 1: Инструкции -->
+            <section class="teacher-section">
+                <h2>📝 Блок 1: Знакомство</h2>
+                <div class="teacher-instructions">
+                    <h3>Что объяснять:</h3>
+                    <ul>
+                        <li>Объясните, что "Mi chiamo" означает "Меня зовут"</li>
+                        <li>Покажите, как использовать "Vivo a" для указания города</li>
+                        <li>Объясните фразу "Cerco lavoro come" (Ищу работу как...)</li>
+                    </ul>
+                    <h3>Где остановиться:</h3>
+                    <p>После каждого вопроса спросите студента, понял ли он. Если видите затруднения, объясните еще раз простыми словами.</p>
+                    <h3>Частые ошибки:</h3>
+                    <ul>
+                        <li>Студенты путают "lavoro" (работа) и "lavorare" (работать)</li>
+                        <li>Могут выбрать временные выражения вместо имен или профессий</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Блок 2: Диалог -->
+            <section class="teacher-section">
+                <h2>💬 Блок 2: Диалог</h2>
+                <div class="teacher-dialogue">
+                    <h3>Полный правильный диалог:</h3>
+                    <div class="dialogue-full">
+                        <div class="dialogue-line">
+                            <span class="speaker">—</span>
+                            <span class="text">Come ti chiami?</span>
+                        </div>
+                        <div class="dialogue-line">
+                            <span class="speaker">—</span>
+                            <span class="text">Mi chiamo Marco</span>
+                        </div>
+                        <div class="dialogue-line">
+                            <span class="speaker">—</span>
+                            <span class="text">Da quanto tempo sei in Italia?</span>
+                        </div>
+                        <div class="dialogue-line">
+                            <span class="speaker">—</span>
+                            <span class="text">Sono in Italia da tre mesi</span>
+                        </div>
+                    </div>
+                    <h3>Как объяснять проще:</h3>
+                    <ul>
+                        <li>"Come ti chiami?" = "Как тебя зовут?"</li>
+                        <li>"Da quanto tempo" = "Сколько времени"</li>
+                        <li>"tre mesi" = "три месяца"</li>
+                    </ul>
+                    <h3>Как переформулировать:</h3>
+                    <p>Если студент не понимает, можно спросить: "Quanto tempo in Italia?" (Сколько времени в Италии?)</p>
+                </div>
+            </section>
+
+            <!-- Блок 3: Собери предложение -->
+            <section class="teacher-section">
+                <h2>🧩 Блок 3: Собери предложение</h2>
+                <div class="teacher-instructions">
+                    <h3>Правильный ответ:</h3>
+                    <p class="correct-answer">Posso lavorare subito</p>
+                    <h3>Что объяснять:</h3>
+                    <ul>
+                        <li>"Posso" = "Могу" (от глагола potere)</li>
+                        <li>"lavorare" = "работать" (инфинитив)</li>
+                        <li>"subito" = "сразу, немедленно"</li>
+                    </ul>
+                    <h3>Где остановиться:</h3>
+                    <p>Попросите студента прочитать получившееся предложение вслух. Это поможет закрепить произношение.</p>
+                </div>
+            </section>
+
+            <!-- Блок 4: Самостоятельное задание -->
+            <section class="teacher-section">
+                <h2>✍️ Блок 4: Самостоятельное задание</h2>
+                <div class="teacher-instructions">
+                    <h3>Что ожидать:</h3>
+                    <ul>
+                        <li>Студенты могут написать очень короткие предложения — это нормально</li>
+                        <li>Не исправляйте каждую ошибку — важно, что они пытаются</li>
+                        <li>Похвалите за попытку, даже если есть ошибки</li>
+                    </ul>
+                    <h3>Примеры хороших ответов:</h3>
+                    <ul>
+                        <li>"Mi chiamo Anna. Vivo a Messina. Cerco lavoro."</li>
+                        <li>"Mi chiamo Marco. Sono studente."</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Дополнительные задания -->
+            <section class="teacher-section">
+                <h2>➕ Attività extra (facoltative)</h2>
+                <div class="extra-activities">
+                    <div class="activity-item">
+                        <h3>1. Устное задание</h3>
+                        <p>Попросите студента рассказать о себе устно, используя фразы из урока.</p>
+                    </div>
+                    <div class="activity-item">
+                        <h3>2. Вопрос соседу</h3>
+                        <p>Если в группе несколько студентов, попросите их задать друг другу вопросы из диалога.</p>
+                    </div>
+                    <div class="activity-item">
+                        <h3>3. Мини-собеседование</h3>
+                        <p>Сыграйте роль работодателя и проведите мини-собеседование, используя изученные фразы.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Финальный квиз -->
+            <section class="teacher-section">
+                <h2>📊 Финальный квиз</h2>
+                <div class="teacher-instructions">
+                    <h3>Инструкции:</h3>
+                    <ul>
+                        <li>Квиз состоит из 10 вопросов разных типов</li>
+                        <li>После завершения показывается результат</li>
+                        <li>Используйте результаты для оценки уровня студента</li>
+                    </ul>
+                    <h3>Оценка результатов:</h3>
+                    <ul>
+                        <li><strong>8-10 правильных:</strong> Студент готов к базовому уровню</li>
+                        <li><strong>5-7 правильных:</strong> Нужна дополнительная практика</li>
+                        <li><strong>0-4 правильных:</strong> Рекомендуется начать с нуля</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="../scripts/state-manager.js"></script>
+    <script src="trial-lesson.js"></script>
+</body>
+</html>
+
