@@ -56,6 +56,42 @@
     animation: fadeInUp 0.5s ease;
 }
 
+/* Блок с рассказом */
+.story-block {
+    max-width: 900px;
+}
+
+.story-content {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 2rem;
+    line-height: 1.9;
+    font-size: 1.125rem;
+    color: #374151;
+    margin-bottom: 2rem;
+}
+
+.story-content p {
+    margin-bottom: 1.25rem;
+}
+
+.story-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Ключевые слова - черным цветом */
+.keyword {
+    color: #000000 !important;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+}
+
+.story-reference {
+    font-size: 0.95rem;
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;

@@ -14,8 +14,8 @@ const TrialLesson = {
     quizQuestions: [
         {
             type: 'multiple',
-            question: 'Как сказать "Я ищу работу"?',
-            options: ['Cerco lavoro', 'Cerco lavoro come', 'Mi chiamo lavoro', 'Vivo a lavoro'],
+            question: 'Как звали студента из истории?',
+            options: ['Marco', 'Messina', 'Cameriere', 'ILearning'],
             correct: 0
         },
         {
@@ -26,13 +26,13 @@ const TrialLesson = {
         },
         {
             type: 'truefalse',
-            question: '"Posso lavorare subito" означает "Могу работать сразу"',
+            question: 'Marco сказал работодателю "Posso lavorare subito" — это означает "Могу работать сразу"',
             correct: true
         },
         {
             type: 'multiple',
-            question: 'Как спросить "Как тебя зовут?"',
-            options: ['Come ti chiami?', 'Come stai?', 'Dove vivi?', 'Cosa cerchi?'],
+            question: 'В каком городе жил Marco?',
+            options: ['Messina', 'Roma', 'Milano', 'Napoli'],
             correct: 0
         },
         {
@@ -43,30 +43,30 @@ const TrialLesson = {
         },
         {
             type: 'multiple',
-            question: 'Что означает "Da quanto tempo sei in Italia?"',
-            options: ['Сколько времени ты в Италии?', 'Где ты живешь?', 'Как тебя зовут?', 'Что ты ищешь?'],
+            question: 'Сколько времени Marco был в Италии, когда нашел работу?',
+            options: ['tre mesi (три месяца)', 'un anno (один год)', 'due settimane (две недели)', 'sei mesi (шесть месяцев)'],
             correct: 0
         },
         {
             type: 'truefalse',
-            question: '"Sono in Italia da tre mesi" означает "Я в Италии три месяца"',
+            question: 'Marco ответил на собеседовании: "Sono in Italia da tre mesi" — это означает "Я в Италии три месяца"',
             correct: true
         },
         {
             type: 'fill',
-            question: 'Выбери правильный вариант: Cerco lavoro come ___',
+            question: 'Какую работу нашел Marco? Cerco lavoro come ___',
             options: ['cameriere', 'lavorare', 'tre mesi', 'domani'],
             correct: 0
         },
         {
             type: 'multiple',
-            question: 'Как сказать "Меня зовут"?',
-            options: ['Mi chiamo', 'Mi vivo', 'Mi cerco', 'Mi lavoro'],
+            question: 'На какой курс записался Marco?',
+            options: ['ILearning', 'Italiano Base', 'Lavoro Facile', 'Messina Corso'],
             correct: 0
         },
         {
             type: 'truefalse',
-            question: '"Vivo a Messina" означает "Я живу в Мессине"',
+            question: 'Marco научился говорить по-итальянски за три месяца благодаря курсу ILearning',
             correct: true
         }
     ],
@@ -117,7 +117,7 @@ const TrialLesson = {
 
     startLesson() {
         document.getElementById('introScreen').classList.remove('active');
-        this.currentBlock = 1;
+        this.currentBlock = 0; // Начинаем с рассказа
         this.showCurrentBlock();
         this.saveProgress();
     },
@@ -127,11 +127,6 @@ const TrialLesson = {
         document.querySelectorAll('.lesson-block').forEach(block => {
             block.style.display = 'none';
         });
-
-        if (this.currentBlock === 0) {
-            document.getElementById('introScreen').classList.add('active');
-            return;
-        }
 
         // Показываем текущий блок
         const currentBlockEl = document.getElementById(`block${this.currentBlock}`);
@@ -145,8 +140,8 @@ const TrialLesson = {
                     this.setupDragAndDrop();
                 }, 100);
             }
-        } else if (this.currentBlock === 5) {
-            // Финальный квиз
+        } else if (this.currentBlock === 6) {
+            // Финальный квиз (теперь это блок 6)
             this.showQuiz();
         }
 
@@ -336,12 +331,12 @@ const TrialLesson = {
     },
 
     nextBlock() {
-        if (this.currentBlock < 4) {
+        if (this.currentBlock < 5) {
             this.currentBlock++;
             this.showCurrentBlock();
-        } else if (this.currentBlock === 4) {
-            // Переход к квизу
-            this.currentBlock = 5;
+        } else if (this.currentBlock === 5) {
+            // Переход к квизу (теперь это блок 6)
+            this.currentBlock = 6;
             this.showQuiz();
         }
         this.saveProgress();
