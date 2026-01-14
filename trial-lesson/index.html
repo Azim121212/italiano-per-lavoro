@@ -75,33 +75,24 @@
                 <div class="fill-blanks">
                     <div class="blank-item" data-question="1">
                         <p class="sentence">Mi chiamo <span class="blank">______</span></p>
-                        <div class="options">
-                            <label><input type="radio" name="q1" value="Marco"> Marco</label>
-                            <label><input type="radio" name="q1" value="lavoro"> lavoro</label>
-                            <label><input type="radio" name="q1" value="tre mesi"> tre mesi</label>
-                            <label><input type="radio" name="q1" value="domani"> domani</label>
+                        <div class="options" id="options-q1">
+                            <!-- Варианты ответов будут сгенерированы через JavaScript -->
                         </div>
                         <div class="feedback" id="feedback1"></div>
                     </div>
 
                     <div class="blank-item" data-question="2">
                         <p class="sentence">Vivo a <span class="blank">______</span></p>
-                        <div class="options">
-                            <label><input type="radio" name="q2" value="Messina"> Messina</label>
-                            <label><input type="radio" name="q2" value="lavorare"> lavorare</label>
-                            <label><input type="radio" name="q2" value="posso"> posso</label>
-                            <label><input type="radio" name="q2" value="subito"> subito</label>
+                        <div class="options" id="options-q2">
+                            <!-- Варианты ответов будут сгенерированы через JavaScript -->
                         </div>
                         <div class="feedback" id="feedback2"></div>
                     </div>
 
                     <div class="blank-item" data-question="3">
                         <p class="sentence">Cerco lavoro come <span class="blank">______</span></p>
-                        <div class="options">
-                            <label><input type="radio" name="q3" value="cameriere"> cameriere</label>
-                            <label><input type="radio" name="q3" value="tre mesi"> tre mesi</label>
-                            <label><input type="radio" name="q3" value="domani"> domani</label>
-                            <label><input type="radio" name="q3" value="lavorare"> lavorare</label>
+                        <div class="options" id="options-q3">
+                            <!-- Варианты ответов будут сгенерированы через JavaScript -->
                         </div>
                         <div class="feedback" id="feedback3"></div>
                     </div>
@@ -129,11 +120,8 @@
                         <span class="speaker">Marco:</span>
                         <span class="text">Mi chiamo <span class="blank">______</span></span>
                     </div>
-                    <div class="options">
-                        <label><input type="radio" name="q4" value="Marco"> Marco</label>
-                        <label><input type="radio" name="q4" value="tre mesi"> tre mesi</label>
-                        <label><input type="radio" name="q4" value="lavoro"> lavoro</label>
-                        <label><input type="radio" name="q4" value="domani"> domani</label>
+                    <div class="options" id="options-q4">
+                        <!-- Варианты ответов будут сгенерированы через JavaScript -->
                     </div>
                     <div class="feedback" id="feedback4"></div>
 
@@ -145,11 +133,8 @@
                         <span class="speaker">Marco:</span>
                         <span class="text">Sono in Italia da <span class="blank">______</span></span>
                     </div>
-                    <div class="options">
-                        <label><input type="radio" name="q5" value="tre mesi"> tre mesi</label>
-                        <label><input type="radio" name="q5" value="un anno"> un anno</label>
-                        <label><input type="radio" name="q5" value="lavoro"> lavoro</label>
-                        <label><input type="radio" name="q5" value="domani"> domani</label>
+                    <div class="options" id="options-q5">
+                        <!-- Варианты ответов будут сгенерированы через JavaScript -->
                     </div>
                     <div class="feedback" id="feedback5"></div>
                 </div>
@@ -212,10 +197,239 @@
             </div>
         </div>
 
+        <!-- Блок 5: Большой диалог на собеседовании -->
+        <div id="block5" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">6</span>
+                <h2>Полный диалог на собеседовании</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Восстанови полный диалог между работодателем и Marco на собеседовании. Выбери правильные ответы для каждого пропуска:</p>
+                <div class="full-dialogue">
+                    <div class="dialogue-line">
+                        <span class="speaker">Работодатель:</span>
+                        <span class="text">Buongiorno! Come ti chiami?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">Marco:</span>
+                        <span class="text">Buongiorno! Mi chiamo <span class="blank">______</span></span>
+                    </div>
+                    <div class="options" id="options-d1">
+                        <!-- Варианты ответов будут сгенерированы -->
+                    </div>
+                    <div class="feedback" id="feedback-d1"></div>
+
+                    <div class="dialogue-line" style="margin-top: 1.5rem;">
+                        <span class="speaker">Работодатель:</span>
+                        <span class="text">Dove vivi?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">Marco:</span>
+                        <span class="text">Vivo a <span class="blank">______</span></span>
+                    </div>
+                    <div class="options" id="options-d2">
+                        <!-- Варианты ответов будут сгенерированы -->
+                    </div>
+                    <div class="feedback" id="feedback-d2"></div>
+
+                    <div class="dialogue-line" style="margin-top: 1.5rem;">
+                        <span class="speaker">Работодатель:</span>
+                        <span class="text">Da quanto tempo sei in Italia?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">Marco:</span>
+                        <span class="text">Sono in Italia da <span class="blank">______</span></span>
+                    </div>
+                    <div class="options" id="options-d3">
+                        <!-- Варианты ответов будут сгенерированы -->
+                    </div>
+                    <div class="feedback" id="feedback-d3"></div>
+
+                    <div class="dialogue-line" style="margin-top: 1.5rem;">
+                        <span class="speaker">Работодатель:</span>
+                        <span class="text">Che lavoro cerchi?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">Marco:</span>
+                        <span class="text">Cerco lavoro come <span class="blank">______</span></span>
+                    </div>
+                    <div class="options" id="options-d4">
+                        <!-- Варианты ответов будут сгенерированы -->
+                    </div>
+                    <div class="feedback" id="feedback-d4"></div>
+
+                    <div class="dialogue-line" style="margin-top: 1.5rem;">
+                        <span class="speaker">Работодатель:</span>
+                        <span class="text">Quando puoi iniziare a lavorare?</span>
+                    </div>
+                    <div class="dialogue-line">
+                        <span class="speaker">Marco:</span>
+                        <span class="text"><span class="blank">______</span></span>
+                    </div>
+                    <div class="options" id="options-d5">
+                        <!-- Варианты ответов будут сгенерированы -->
+                    </div>
+                    <div class="feedback" id="feedback-d5"></div>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn5" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 6: Сопоставление фраз -->
+        <div id="block6" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">7</span>
+                <h2>Сопоставь фразы</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Сопоставь итальянские фразы с их переводами. Перетащи фразы к правильным переводам:</p>
+                <div class="matching-exercise" id="matching1">
+                    <div class="matching-left">
+                        <div class="matching-item" draggable="true" data-value="Mi chiamo">Mi chiamo</div>
+                        <div class="matching-item" draggable="true" data-value="Vivo a">Vivo a</div>
+                        <div class="matching-item" draggable="true" data-value="Cerco lavoro">Cerco lavoro</div>
+                        <div class="matching-item" draggable="true" data-value="Posso lavorare subito">Posso lavorare subito</div>
+                    </div>
+                    <div class="matching-right">
+                        <div class="matching-target" data-correct="Posso lavorare subito">Могу работать сразу</div>
+                        <div class="matching-target" data-correct="Mi chiamo">Меня зовут</div>
+                        <div class="matching-target" data-correct="Vivo a">Я живу в</div>
+                        <div class="matching-target" data-correct="Cerco lavoro">Я ищу работу</div>
+                    </div>
+                </div>
+                <div class="feedback" id="feedback-m1"></div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn6" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 7: Выбери правильный порядок слов -->
+        <div id="block7" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">8</span>
+                <h2>Составь предложение</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Составь предложение из слов. Кликай на слова в правильном порядке:</p>
+                <p class="story-reference" style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    💡 <strong>Вспомни:</strong> Marco сказал "Sono in Italia da tre mesi"
+                </p>
+                <div class="sentence-builder">
+                    <div class="words-container" id="wordsContainer2">
+                        <span class="word" data-word="tre">tre</span>
+                        <span class="word" data-word="in">in</span>
+                        <span class="word" data-word="mesi">mesi</span>
+                        <span class="word" data-word="Sono">Sono</span>
+                        <span class="word" data-word="Italia">Italia</span>
+                        <span class="word" data-word="da">da</span>
+                    </div>
+                    <div class="sentence-result">
+                        <p>Твое предложение:</p>
+                        <div class="sentence-words" id="sentenceWords2"></div>
+                    </div>
+                    <div class="feedback" id="feedback-s2"></div>
+                    <button class="btn btn-secondary" onclick="TrialLesson.resetSentence2()">
+                        Сбросить
+                    </button>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn7" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 8: Заполни пропуски в тексте -->
+        <div id="block8" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">9</span>
+                <h2>Заполни текст о Marco</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Заполни пропуски в тексте о Marco, выбрав правильные слова:</p>
+                <div class="text-fill-exercise">
+                    <p>Ciao! Mi chiamo <span class="blank-select" id="blank-t1">______</span>. Vivo a <span class="blank-select" id="blank-t2">______</span>.</p>
+                    <p>Sono in Italia da <span class="blank-select" id="blank-t3">______</span>. Cerco lavoro come <span class="blank-select" id="blank-t4">______</span>.</p>
+                    <p><span class="blank-select" id="blank-t5">______</span> lavorare subito!</p>
+                </div>
+                <div class="text-fill-options" id="textFillOptions">
+                    <!-- Варианты ответов будут сгенерированы -->
+                </div>
+                <div class="feedback" id="feedback-t1"></div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn8" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 9: Выбери правильную реакцию -->
+        <div id="block9" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">10</span>
+                <h2>Как бы ты ответил?</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">Представь, что ты на собеседовании. Выбери правильный ответ на каждый вопрос работодателя:</p>
+                <div class="reaction-exercise">
+                    <div class="reaction-item">
+                        <p class="reaction-question"><strong>Работодатель:</strong> "Come ti chiami?"</p>
+                        <div class="options" id="options-r1">
+                            <!-- Варианты ответов будут сгенерированы -->
+                        </div>
+                        <div class="feedback" id="feedback-r1"></div>
+                    </div>
+                    <div class="reaction-item" style="margin-top: 2rem;">
+                        <p class="reaction-question"><strong>Работодатель:</strong> "Quando puoi iniziare?"</p>
+                        <div class="options" id="options-r2">
+                            <!-- Варианты ответов будут сгенерированы -->
+                        </div>
+                        <div class="feedback" id="feedback-r2"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn9" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
+        <!-- Блок 10: Найди ошибки -->
+        <div id="block10" class="lesson-block" style="display: none;">
+            <div class="block-header">
+                <span class="block-number">11</span>
+                <h2>Найди ошибки</h2>
+            </div>
+            <div class="block-content">
+                <p class="instruction">В предложениях есть ошибки. Выбери правильный вариант вместо неправильного:</p>
+                <div class="error-finding">
+                    <div class="error-item">
+                        <p class="sentence">Mi <span class="error-word">vivo</span> Marco. <span class="correct-word">(должно быть: chiamo)</span></p>
+                        <p class="instruction-small">Выбери правильное слово:</p>
+                        <div class="options" id="options-e1">
+                            <!-- Варианты ответов будут сгенерированы -->
+                        </div>
+                        <div class="feedback" id="feedback-e1"></div>
+                    </div>
+                    <div class="error-item" style="margin-top: 2rem;">
+                        <p class="sentence">Vivo a <span class="error-word">lavorare</span>. <span class="correct-word">(должно быть: Messina)</span></p>
+                        <p class="instruction-small">Выбери правильное слово:</p>
+                        <div class="options" id="options-e2">
+                            <!-- Варианты ответов будут сгенерированы -->
+                        </div>
+                        <div class="feedback" id="feedback-e2"></div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="TrialLesson.nextBlock()" id="nextBtn10" disabled>
+                    Далее →
+                </button>
+            </div>
+        </div>
+
         <!-- Финальный квиз -->
         <div id="quizBlock" class="lesson-block" style="display: none;">
             <div class="block-header">
-                <span class="block-number">6</span>
+                <span class="block-number">12</span>
                 <h2>Финальный квиз по истории Marco</h2>
             </div>
             <div class="block-content">
