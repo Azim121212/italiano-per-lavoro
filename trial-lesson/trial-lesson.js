@@ -65,8 +65,8 @@ const TrialLesson = {
     quizQuestions: [
         {
             type: 'multiple',
-            question: 'Как звали студента из истории?',
-            options: ['Marco', 'Messina', 'Cameriere', 'ILearning'],
+            question: 'Сколько человек было в группе Marco на курсе?',
+            options: ['Sette (семь)', 'Dieci (десять)', 'Cinque (пять)', 'Quindici (пятнадцать)'],
             correct: 0
         },
         {
@@ -77,48 +77,48 @@ const TrialLesson = {
         },
         {
             type: 'truefalse',
-            question: 'Marco сказал работодателю "Posso lavorare subito" — это означает "Могу работать сразу"',
-            correct: true
+            question: 'Marco сказал работодателю "Posso lavorare domani" — это означает "Могу работать сразу"',
+            correct: false
         },
         {
             type: 'multiple',
-            question: 'В каком городе жил Marco?',
-            options: ['Messina', 'Roma', 'Milano', 'Napoli'],
+            question: 'Сколько длилось каждое занятие на курсе?',
+            options: ['Novanta minuti (девяносто минут)', 'Sessanta minuti (шестьдесят минут)', 'Centoventi minuti (сто двадцать минут)', 'Trenta minuti (тридцать минут)'],
             correct: 0
         },
         {
             type: 'fill',
-            question: 'Выбери правильный вариант: Vivo a ___',
-            options: ['Messina', 'lavorare', 'tre mesi', 'domani'],
+            question: 'Что означает фраза "Hai esperienza?"',
+            options: ['У тебя есть опыт?', 'Где ты живешь?', 'Как тебя зовут?', 'Что ты ищешь?'],
             correct: 0
         },
         {
             type: 'multiple',
             question: 'Сколько времени Marco был в Италии, когда нашел работу?',
-            options: ['tre mesi (три месяца)', 'un anno (один год)', 'due settimane (две недели)', 'sei mesi (шесть месяцев)'],
+            options: ['Tre mesi (три месяца)', 'Un anno (один год)', 'Due settimane (две недели)', 'Sei mesi (шесть месяцев)'],
             correct: 0
         },
         {
             type: 'truefalse',
-            question: 'Marco ответил на собеседовании: "Sono in Italia da tre mesi" — это означает "Я в Италии три месяца"',
-            correct: true
+            question: 'Marco ответил работодателю, что у него уже есть опыт работы cameriere',
+            correct: false
         },
         {
             type: 'fill',
-            question: 'Какую работу нашел Marco? Cerco lavoro come ___',
-            options: ['cameriere', 'lavorare', 'tre mesi', 'domani'],
+            question: 'Какую зарплату получал Marco?',
+            options: ['Novecento euro (девятьсот евро)', 'Mille euro (тысяча евро)', 'Cinquecento euro (пятьсот евро)', 'Duemila euro (две тысячи евро)'],
             correct: 0
         },
         {
             type: 'multiple',
-            question: 'На какой курс записался Marco?',
-            options: ['ILearning', 'Italiano Base', 'Lavoro Facile', 'Messina Corso'],
+            question: 'Как часто проходили занятия на курсе ILearning?',
+            options: ['Tre volte a settimana (три раза в неделю)', 'Una volta a settimana (один раз в неделю)', 'Cinque volte a settimana (пять раз в неделю)', 'Due volte a settimana (два раза в неделю)'],
             correct: 0
         },
         {
             type: 'truefalse',
-            question: 'Marco научился говорить по-итальянски за три месяца благодаря курсу ILearning',
-            correct: true
+            question: 'Marco научился говорить по-итальянски за один месяц',
+            correct: false
         }
     ],
     sentenceOrder: [],
@@ -888,6 +888,24 @@ const TrialLesson = {
             
             this.checkBlockCompletion();
             this.saveProgress();
+        }
+    },
+    
+    // Функция для показа/скрытия подсказок
+    toggleHint(hintId) {
+        const hint = document.getElementById(hintId);
+        const toggle = document.getElementById('hintToggle' + hintId.replace('hint', ''));
+        
+        if (!hint || !toggle) return;
+        
+        const isVisible = hint.style.display !== 'none';
+        
+        if (isVisible) {
+            hint.style.display = 'none';
+            toggle.innerHTML = '<span class="eye-icon">👁️</span> <span class="hint-text">Показать подсказку</span>';
+        } else {
+            hint.style.display = 'block';
+            toggle.innerHTML = '<span class="eye-icon">👁️‍🗨️</span> <span class="hint-text">Скрыть подсказку</span>';
         }
     },
     
