@@ -308,6 +308,11 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
+.trial-lesson-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+}
+
 .course-card h3 {
     margin-bottom: 0.5rem;
     color: var(--primary-color);

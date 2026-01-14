@@ -39,10 +39,21 @@ const StudentDashboard = {
         const navItems = document.querySelectorAll('#studentDashboard .nav-item');
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {
-                e.preventDefault();
                 const section = item.dataset.section;
                 
-                navItems.forEach(nav => nav.classList.remove('active'));
+                // Если это внешняя ссылка (без data-section), не обрабатываем
+                if (!section) {
+                    return; // Позволяем браузеру обработать ссылку нормально
+                }
+                
+                e.preventDefault();
+                
+                navItems.forEach(nav => {
+                    // Убираем active только у внутренних ссылок
+                    if (nav.dataset.section) {
+                        nav.classList.remove('active');
+                    }
+                });
                 item.classList.add('active');
                 
                 this.showSection(section);
@@ -79,8 +90,35 @@ const StudentDashboard = {
         const courses = PlatformAPI.getCourses();
         const container = document.getElementById('studentCourses');
         
+        let html = '';
+        
+        // Добавляем карточку пробного урока
+        html += `
+            <div class="course-card trial-lesson-card" onclick="window.open('../trial-lesson/index.html', '_blank')" style="border: 2px solid #10b981; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <span style="font-size: 2.5rem;">🎓</span>
+                    <div>
+                        <h3 style="margin: 0; color: #059669;">Пробный урок</h3>
+                        <p style="margin: 0.5rem 0 0 0; color: #047857; font-weight: 500;">Prova gratuita — Lezione introduttiva di italiano</p>
+                    </div>
+                </div>
+                <p style="color: #065f46; margin-bottom: 1rem;">
+                    Познакомься с базовыми фразами для жизни и работы в Италии. 
+                    Интерактивные задания, диалоги и финальный квиз.
+                </p>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                    <span style="background: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; color: #059669;">Бесплатно</span>
+                    <span style="background: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; color: #059669;">~55 минут</span>
+                    <span style="background: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.875rem; color: #059669;">Интерактивно</span>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem; width: 100%; background: #10b981; border-color: #10b981;" onclick="event.stopPropagation(); window.open('../trial-lesson/index.html', '_blank')">
+                    Начать пробный урок →
+                </button>
+            </div>
+        `;
+        
         if (courses.length === 0) {
-            container.innerHTML = '<p>Нет доступных курсов</p>';
+            container.innerHTML = html + '<p>Нет доступных курсов</p>';
             return;
         }
 
@@ -89,7 +127,7 @@ const StudentDashboard = {
         const modules = PlatformAPI.getModules(course.id);
         const progress = PlatformAPI.getStudentProgress(this.currentUser.id, course.id);
 
-        container.innerHTML = `
+        html += `
             <div class="course-card" onclick="StudentDashboard.openCourse(${course.id})">
                 <h3>${course.name}</h3>
                 <p>${course.description}</p>
@@ -105,6 +143,8 @@ const StudentDashboard = {
                 </p>
             </div>
         `;
+        
+        container.innerHTML = html;
     },
 
     openCourse(courseId) {
