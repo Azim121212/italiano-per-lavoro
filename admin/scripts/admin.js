@@ -1313,22 +1313,111 @@ function savePlatformUser() {
     });
     
     // Сохраняем пользователя
+    console.log('🔄 Начало сохранения пользователя:', user.email);
     const savedUser = API.savePlatformUser(user);
     
     if (!savedUser) {
-        alert('Ошибка при сохранении пользователя. Проверьте консоль браузера.');
+        console.error('❌ API.savePlatformUser вернул null');
+        alert('Ошибка при сохранении пользователя. Проверьте консоль браузера (F12).');
         return;
     }
     
-    // Проверяем, что пользователь действительно сохранен
-    const allUsers = API.getPlatformUsers();
-    const verifyUser = allUsers.find(u => 
-        (savedUser.id && u.id === savedUser.id) || 
-        ((u.email || '').trim().toLowerCase() === user.email)
-    );
+    console.log('✅ Пользователь сохранен через API:', savedUser);
+    
+    // ВАЖНО: Принудительно перечитываем пользователей из localStorage
+    // Читаем напрямую из localStorage сразу после сохранения
+    const rawData = localStorage.getItem('platform_users');
+    console.log('📖 Чтение из localStorage после сохранения', rawData ? 'данные найдены' : 'данные отсутствуют');
+    
+    let allUsers = [];
+    let verifyUser = null;
+    
+    if (rawData) {
+        try {
+            allUsers = JSON.parse(rawData);
+            console.log(`📋 Найдено пользователей: ${allUsers.length}`);
+            console.log('📋 Все email в системе:', allUsers.map(u => u.email));
+            
+            // Ищем пользователя по email (самый надежный способ)
+            verifyUser = allUsers.find(u => {
+                const uEmail = (u.email || '').trim().toLowerCase();
+                const searchEmail = user.email.trim().toLowerCase();
+                const match = uEmail === searchEmail;
+                if (match) {
+                    console.log('✅ Найден пользователь:', {
+                        id: u.id,
+                        email: u.email,
+                        role: u.role,
+                        hasPassword: !!u.password
+                    });
+                }
+                return match;
+            });
+            
+            if (verifyUser) {
+                console.log('✅ Пользователь найден в localStorage:', {
+                    id: verifyUser.id,
+                    email: verifyUser.email,
+                    password: verifyUser.password ? '*** (длина: ' + verifyUser.password.length + ')' : 'ПУСТО',
+                    role: verifyUser.role
+                });
+            } else {
+                console.warn(`⚠️ Пользователь ${user.email} не найден в списке. Доступные email:`, 
+                    allUsers.map(u => u.email));
+            }
+        } catch (e) {
+            console.error('Ошибка парсинга localStorage:', e);
+        }
+    }
+    
+    // Если пользователь все еще не найден, пытаемся сохранить напрямую
+    if (!verifyUser) {
+        console.warn('⚠️ Пользователь не найден после сохранения, пытаемся сохранить напрямую');
+        
+        // Получаем текущий список
+        const currentUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
+        
+        // Проверяем, нет ли уже пользователя с таким email
+        const existingIndex = currentUsers.findIndex(u => 
+            (u.email || '').trim().toLowerCase() === user.email.trim().toLowerCase()
+        );
+        
+        if (existingIndex >= 0) {
+            // Обновляем существующего
+            currentUsers[existingIndex] = {
+                ...currentUsers[existingIndex],
+                ...savedUser,
+                password: savedUser.password || user.password || (user.email.substring(0, 6) + '123')
+            };
+            verifyUser = currentUsers[existingIndex];
+        } else {
+            // Добавляем нового
+            const newUser = {
+                ...savedUser,
+                id: savedUser.id || Date.now(),
+                email: user.email.trim().toLowerCase(),
+                password: savedUser.password || user.password || (user.email.substring(0, 6) + '123'),
+                role: user.role || 'student',
+                name: user.name || 'Пользователь'
+            };
+            currentUsers.push(newUser);
+            verifyUser = newUser;
+        }
+        
+        // Сохраняем обратно
+        localStorage.setItem('platform_users', JSON.stringify(currentUsers));
+        console.log('💾 Пользователь сохранен напрямую в localStorage');
+        
+        // Проверяем еще раз
+        const verifyData = localStorage.getItem('platform_users');
+        const verifyUsers = JSON.parse(verifyData || '[]');
+        verifyUser = verifyUsers.find(u => 
+            (u.email || '').trim().toLowerCase() === user.email.trim().toLowerCase()
+        );
+    }
     
     if (verifyUser) {
-        console.log('Пользователь успешно сохранен:', {
+        console.log('✅ Пользователь успешно сохранен и проверен:', {
             id: verifyUser.id,
             email: verifyUser.email,
             password: verifyUser.password ? '*** (длина: ' + verifyUser.password.length + ')' : 'ПУСТО',
@@ -1336,17 +1425,34 @@ function savePlatformUser() {
         });
         
         // Показываем сохраненный пароль пользователю
-        const savedPassword = verifyUser.password || user.password || 'admin';
-        alert(`Пользователь "${user.name}" успешно ${user.id ? 'обновлен' : 'создан'}!\n\nEmail: ${user.email}\nПароль: ${savedPassword}\nРоль: ${user.role === 'student' ? 'Студент' : 'Преподаватель'}\n\nТеперь можно войти на платформу обучения с этими данными.`);
+        const savedPassword = verifyUser.password || user.password || (user.email.substring(0, 6) + '123');
+        alert(`✅ Пользователь "${user.name}" успешно ${user.id ? 'обновлен' : 'создан'}!\n\nEmail: ${verifyUser.email}\nПароль: ${savedPassword}\nРоль: ${verifyUser.role === 'student' ? 'Студент' : 'Преподаватель'}\n\nТеперь можно войти на платформу обучения с этими данными.`);
     } else {
-        console.error('Ошибка: пользователь не найден после сохранения');
+        console.error('❌ КРИТИЧЕСКАЯ ОШИБКА: пользователь не найден после всех попыток сохранения');
         console.log('Все пользователи в системе:', allUsers);
-        alert('Ошибка при сохранении пользователя. Проверьте консоль браузера (F12).');
+        console.log('Попытка сохранения пользователя:', user);
+        alert('❌ Критическая ошибка: пользователь не был сохранен.\n\nПроверьте консоль браузера (F12) для деталей.\n\nEmail: ' + user.email);
+        return;
     }
     
     closeModal();
+    
+    // Принудительно обновляем список пользователей
     loadPlatformUsers();
     loadDashboard();
+    
+    // Дополнительная проверка через небольшую задержку
+    setTimeout(() => {
+        const finalCheck = API.getPlatformUsers();
+        const finalUser = finalCheck.find(u => 
+            (u.email || '').trim().toLowerCase() === user.email.trim().toLowerCase()
+        );
+        if (finalUser) {
+            console.log('✅ Финальная проверка: пользователь найден в системе');
+        } else {
+            console.error('❌ Финальная проверка: пользователь НЕ найден в системе');
+        }
+    }, 500);
 }
 
 function editPlatformUser(id) {
