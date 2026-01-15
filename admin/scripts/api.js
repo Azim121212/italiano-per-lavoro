@@ -430,28 +430,47 @@ const API = {
         if (normalizedUser.id) {
             const index = users.findIndex(u => u.id === normalizedUser.id);
             if (index >= 0) {
-                // Обновляем существующего пользователя - ВАЖНО: полностью заменяем объект для гарантии сохранения всех полей
-                users[index] = {
-                    ...users[index],
-                    ...normalizedUser,
-                    password: normalizedUser.password // Гарантируем что пароль обновлен
+                // Обновляем существующего пользователя - ВАЖНО: сохраняем пароль явно
+                const existingPassword = users[index].password;
+                const newPassword = normalizedUser.password && normalizedUser.password.trim() !== '' 
+                    ? normalizedUser.password 
+                    : existingPassword;
+                
+                // Создаем обновленного пользователя с гарантией сохранения пароля
+                const updatedUser = {
+                    ...users[index], // Старые данные
+                    ...normalizedUser, // Новые данные
+                    password: newPassword || normalizedEmail.substring(0, 6) + '123' // Гарантируем пароль
                 };
+                
+                users[index] = updatedUser;
+                
                 console.log('Пользователь обновлен:', {
-                    id: users[index].id,
-                    email: users[index].email,
-                    password: users[index].password ? '*** (длина: ' + users[index].password.length + ')' : 'ПУСТО',
-                    role: users[index].role
+                    id: updatedUser.id,
+                    email: updatedUser.email,
+                    password: updatedUser.password ? '*** (длина: ' + updatedUser.password.length + ')' : 'ПУСТО',
+                    role: updatedUser.role,
+                    старый_пароль_был: existingPassword ? '***' : 'ПУСТО',
+                    новый_пароль: newPassword ? '***' : 'ПУСТО'
                 });
             } else {
                 // ID указан, но пользователь не найден - добавляем как нового
                 if (!normalizedUser.id) {
                     normalizedUser.id = Date.now();
                 }
+                // Убеждаемся что пароль есть
+                if (!normalizedUser.password || normalizedUser.password.trim() === '') {
+                    normalizedUser.password = normalizedEmail.substring(0, 6) + '123';
+                }
                 users.push(normalizedUser);
                 console.log('Пользователь добавлен (ID был указан, но не найден):', normalizedUser);
             }
         } else {
             normalizedUser.id = Date.now();
+            // Убеждаемся что пароль есть
+            if (!normalizedUser.password || normalizedUser.password.trim() === '') {
+                normalizedUser.password = normalizedEmail.substring(0, 6) + '123';
+            }
             users.push(normalizedUser);
             console.log('Новый пользователь добавлен:', normalizedUser);
         }
@@ -476,38 +495,53 @@ const API = {
                 // Проверяем что пароль действительно сохранен
                 if (!savedUser.password || savedUser.password.trim() === '') {
                     console.warn('⚠️ Пароль пустой после сохранения, восстанавливаем');
-                    savedUser.password = normalizedUser.password;
+                    // Используем пароль из normalizedUser или генерируем новый
+                    const restoredPassword = normalizedUser.password && normalizedUser.password.trim() !== ''
+                        ? normalizedUser.password
+                        : normalizedEmail.substring(0, 6) + '123';
+                    
+                    savedUser.password = restoredPassword;
                     const index = savedUsers.findIndex(u => 
                         (normalizedUser.id && u.id === normalizedUser.id) || 
                         ((u.email || '').trim().toLowerCase() === normalizedEmail)
                     );
                     if (index >= 0) {
-                        savedUsers[index] = savedUser;
+                        savedUsers[index].password = restoredPassword;
                         localStorage.setItem('platform_users', JSON.stringify(savedUsers));
+                        console.log('✅ Пароль восстановлен и сохранен');
                     }
                 }
+                
+                // Финальная проверка пароля перед возвратом
+                const finalPassword = savedUser.password && savedUser.password.trim() !== ''
+                    ? savedUser.password.trim()
+                    : normalizedEmail.substring(0, 6) + '123';
                 
                 console.log('✅ Пользователь успешно сохранен:', {
                     id: savedUser.id,
                     email: savedUser.email,
-                    password: savedUser.password ? '*** (длина: ' + savedUser.password.length + ')' : 'ПУСТО',
+                    password: finalPassword ? '*** (длина: ' + finalPassword.length + ')' : 'ПУСТО',
                     role: savedUser.role,
                     name: savedUser.name
                 });
                 
-                // Возвращаем нормализованного пользователя
+                // Возвращаем нормализованного пользователя с гарантированным паролем
                 return {
                     ...savedUser,
                     email: (savedUser.email || '').trim().toLowerCase(),
-                    password: (savedUser.password || '').trim()
+                    password: finalPassword
                 };
             } else {
                 console.error('❌ Ошибка: пользователь не найден после сохранения в localStorage');
-                // Возвращаем нормализованного пользователя
+                // Возвращаем нормализованного пользователя с гарантированным паролем
+                const finalPassword = normalizedUser.password && normalizedUser.password.trim() !== ''
+                    ? normalizedUser.password.trim()
+                    : normalizedEmail.substring(0, 6) + '123';
+                
                 return {
                     ...normalizedUser,
                     email: normalizedEmail,
-                    password: normalizedUser.password
+                    password: finalPassword
                 };
             }
         } catch (error) {

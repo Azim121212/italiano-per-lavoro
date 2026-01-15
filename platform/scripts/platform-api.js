@@ -224,10 +224,14 @@ const PlatformAPI = {
         const normalizedUsers = users.map(user => {
             // Убеждаемся, что есть все необходимые поля
             if (!user.email) user.email = user.username || 'admin';
-            if (!user.password) {
-                console.warn('Пользователь без пароля:', user.email);
-                user.password = 'admin';
+            
+            // ВАЖНО: Если пароль пустой или отсутствует, генерируем из email
+            if (!user.password || user.password.trim() === '') {
+                const normalizedEmail = (user.email || '').trim().toLowerCase();
+                user.password = normalizedEmail.substring(0, 6) + '123';
+                console.warn('⚠️ Пользователь без пароля, сгенерирован из email:', normalizedEmail, '→', user.password);
             }
+            
             if (!user.role) user.role = 'student';
             if (!user.name) user.name = user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Администратор';
             
@@ -237,6 +241,17 @@ const PlatformAPI = {
             
             return user;
         });
+        
+        // Сохраняем нормализованных пользователей обратно, если были изменения
+        const hasChanges = normalizedUsers.some((u, i) => {
+            const original = users[i];
+            return !original || u.password !== original.password || u.email !== original.email;
+        });
+        
+        if (hasChanges) {
+            localStorage.setItem('platform_users', JSON.stringify(normalizedUsers));
+            console.log('✅ Пользователи нормализованы и сохранены');
+        }
         
         console.log('Нормализованные пользователи:', normalizedUsers.map(u => ({
             id: u.id,
