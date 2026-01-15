@@ -126,7 +126,7 @@
                             <button class="btn btn-primary" id="quickAddStudent">+ Студент</button>
                             <button class="btn btn-primary" id="quickAddGroup">+ Группа</button>
                             <button class="btn btn-primary" id="quickAddCourse">+ Курс</button>
-                            <button class="btn btn-primary" id="quickAddPlatformUser">+ Пользователь</button>
+                            <button class="btn btn-primary" id="quickAddPlatformUser" style="background: #10b981; border-color: #10b981;">+ Пользователь платформы</button>
                         </div>
                     </div>
 
@@ -163,8 +163,11 @@
                     </div>
 
                     <!-- Quick Create User Form -->
-                    <div class="dashboard-card" style="margin-top: 2rem;">
-                        <h3 style="margin-bottom: 1rem;">Быстрое создание пользователя</h3>
+                    <div class="dashboard-card" style="margin-top: 2rem; border: 2px solid #10b981; background: #f0fdf4;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; color: #10b981;">👤 Быстрое создание пользователя платформы</h3>
+                            <button class="btn btn-primary" onclick="document.getElementById('quickUserForm').scrollIntoView({ behavior: 'smooth', block: 'center' }); document.getElementById('quickUserForm').querySelector('input[name=\"name\"]')?.focus();" style="background: #10b981; border-color: #10b981;">Создать пользователя</button>
+                        </div>
                         <form id="quickUserForm" class="quick-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
                             <div class="form-group">
                                 <label>Имя</label>
