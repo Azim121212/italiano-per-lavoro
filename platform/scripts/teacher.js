@@ -64,6 +64,8 @@ const TeacherDashboard = {
             
             if (sectionName === 'groups') {
                 this.loadGroups();
+            } else if (sectionName === 'trial-lesson') {
+                this.loadTrialLesson();
             } else if (sectionName === 'lessons') {
                 this.loadLessons();
             } else if (sectionName === 'assignments') {
@@ -79,26 +81,101 @@ const TeacherDashboard = {
         const teacherGroups = groups.filter(g => g.teacherId === this.currentUser.id);
         const container = document.getElementById('teacherGroups');
 
-        if (teacherGroups.length === 0) {
-            container.innerHTML = '<p>У вас нет групп</p>';
-            return;
-        }
-
-        container.innerHTML = teacherGroups.map(group => {
-            const students = PlatformAPI.getGroupStudents(group.id);
-            const course = PlatformAPI.getCourses().find(c => c.id === group.courseId);
-            
-            return `
-                <div class="group-card" onclick="TeacherDashboard.openGroup(${group.id})">
-                    <h3>${group.name}</h3>
-                    <p>${course ? course.name : ''}</p>
-                    <div class="group-stats">
-                        <span>👥 ${students.length} студентов</span>
-                        <span>📚 ${course ? course.name : ''}</span>
+        let html = '';
+        
+        // Добавляем карточку пробного урока для преподавателя
+        html += `
+            <div class="course-card trial-lesson-card" onclick="window.open('../trial-lesson/index.html?view=teacher', '_blank')" style="border: 2px solid #10b981; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); cursor: pointer; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="font-size: 3rem;">🎓</div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0; color: #059669; font-size: 1.25rem;">Пробный урок (Вид преподавателя)</h3>
+                        <p style="margin: 0.5rem 0; color: #047857; font-size: 0.9rem;">
+                            Интерактивный пробный урок с возможностью просмотра ответов студентов и управления уроком
+                        </p>
+                        <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap;">
+                            <span style="background: #10b981; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem;">Интерактивный</span>
+                            <span style="background: #3b82f6; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem;">Управление</span>
+                            <span style="background: #8b5cf6; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.875rem;">Статистика</span>
+                        </div>
                     </div>
                 </div>
-            `;
-        }).join('');
+                <button class="btn btn-primary" style="margin-top: 1rem; width: 100%; background: #10b981; border-color: #10b981;" onclick="event.stopPropagation(); window.open('../trial-lesson/index.html?view=teacher', '_blank')">
+                    Открыть пробный урок (Вид преподавателя) →
+                </button>
+            </div>
+        `;
+
+        if (teacherGroups.length === 0) {
+            html += '<p>У вас нет групп</p>';
+        } else {
+            html += teacherGroups.map(group => {
+                const students = PlatformAPI.getGroupStudents(group.id);
+                const course = PlatformAPI.getCourses().find(c => c.id === group.courseId);
+                
+                return `
+                    <div class="group-card" onclick="TeacherDashboard.openGroup(${group.id})">
+                        <h3>${group.name}</h3>
+                        <p>${course ? course.name : ''}</p>
+                        <div class="group-stats">
+                            <span>👥 ${students.length} студентов</span>
+                            <span>📚 ${course ? course.name : ''}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        container.innerHTML = html;
+    },
+
+    loadTrialLesson() {
+        const container = document.getElementById('trialLessonContent');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="course-card trial-lesson-card" style="border: 2px solid #10b981; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); padding: 2rem; border-radius: 12px; margin-bottom: 2rem;">
+                <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="font-size: 4rem;">🎓</div>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0; color: #059669; font-size: 1.5rem;">Пробный урок (Вид преподавателя)</h3>
+                        <p style="margin: 0.5rem 0; color: #047857; font-size: 1rem;">
+                            Интерактивный пробный урок с возможностью просмотра ответов студентов и управления уроком
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h4 style="margin-top: 0; color: #059669;">Возможности вида преподавателя:</h4>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: #065f46;">
+                        <li>Просмотр всех ответов студентов</li>
+                        <li>Статистика по выполнению заданий</li>
+                        <li>Управление уроком и материалами</li>
+                        <li>Просмотр прогресса студентов</li>
+                        <li>Возможность комментирования ответов</li>
+                    </ul>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                    <span style="background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">Интерактивный</span>
+                    <span style="background: #3b82f6; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">Управление</span>
+                    <span style="background: #8b5cf6; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">Статистика</span>
+                    <span style="background: #f59e0b; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">~55 минут</span>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; background: #10b981; border-color: #10b981; padding: 1rem; font-size: 1.1rem; font-weight: 600;" onclick="window.open('../trial-lesson/index.html?view=teacher', '_blank')">
+                    🎓 Открыть пробный урок (Вид преподавателя) →
+                </button>
+            </div>
+
+            <div style="background: #eff6ff; border: 1px solid #3b82f6; border-radius: 8px; padding: 1.5rem; margin-top: 2rem;">
+                <h4 style="margin-top: 0; color: #1e40af;">💡 Подсказка</h4>
+                <p style="margin: 0.5rem 0; color: #1e3a8a;">
+                    В виде преподавателя вы сможете видеть все ответы студентов, статистику выполнения заданий и управлять уроком. 
+                    Это поможет вам лучше понять, как студенты проходят материал и где им нужна помощь.
+                </p>
+            </div>
+        `;
     },
 
     openGroup(groupId) {
