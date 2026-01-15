@@ -80,35 +80,48 @@ const PlatformAPI = {
         let user = null;
         let foundUserByEmail = null;
         
-        // Сначала ищем пользователя по email
+        // Сначала ищем пользователя по email (нормализованному)
         foundUserByEmail = users.find(u => {
             const userEmail = (u.email || '').trim().toLowerCase();
-            return userEmail === email;
+            const searchEmail = email.trim().toLowerCase();
+            return userEmail === searchEmail;
         });
         
         if (foundUserByEmail) {
             const userEmail = (foundUserByEmail.email || '').trim().toLowerCase();
             const userPassword = (foundUserByEmail.password || '').trim();
             const userRole = foundUserByEmail.role || 'student';
+            const inputPassword = password.trim();
             
-            const passwordMatch = userPassword === password;
+            console.log('🔍 Найден пользователь по email:', {
+                email: userEmail,
+                введенный_пароль: inputPassword ? '*** (длина: ' + inputPassword.length + ')' : 'ПУСТО',
+                сохраненный_пароль: userPassword ? '*** (длина: ' + userPassword.length + ')' : 'ПУСТО',
+                введенная_роль: role,
+                сохраненная_роль: userRole
+            });
+            
+            const passwordMatch = userPassword === inputPassword;
             const roleMatch = userRole === role;
             
             if (passwordMatch && roleMatch) {
                 user = foundUserByEmail;
+                console.log('✅ Все данные совпадают, вход разрешен');
             } else {
                 // Логируем детали для отладки
                 if (!passwordMatch) {
-                    console.warn('Email найден, но пароль не совпадает:', {
+                    console.error('❌ Пароль не совпадает:', {
                         email: userEmail,
-                        введенный_пароль: password ? '*** (длина: ' + password.length + ')' : 'ПУСТО',
-                        сохраненный_пароль: userPassword ? '*** (длина: ' + userPassword.length + ')' : 'ПУСТО',
-                        сохраненный_пароль_полный: userPassword // Временно для отладки
+                        введенный_пароль: inputPassword,
+                        сохраненный_пароль: userPassword,
+                        пароли_равны: userPassword === inputPassword,
+                        введенный_длина: inputPassword.length,
+                        сохраненный_длина: userPassword.length
                     });
                 }
                 
                 if (passwordMatch && !roleMatch) {
-                    console.warn('Email и пароль совпадают, но роль не совпадает:', {
+                    console.warn('⚠️ Роль не совпадает:', {
                         email: userEmail,
                         введенная_роль: role,
                         сохраненная_роль: userRole,
@@ -116,6 +129,9 @@ const PlatformAPI = {
                     });
                 }
             }
+        } else {
+            console.warn('⚠️ Пользователь с email не найден:', email);
+            console.log('📋 Доступные email:', users.map(u => u.email));
         }
         
         if (user) {
@@ -252,49 +268,75 @@ const PlatformAPI = {
     },
 
     getUsers() {
-        const users = JSON.parse(localStorage.getItem('platform_users') || '[]');
-        console.log('Получение пользователей из localStorage:', users.length, 'пользователей');
+        const rawData = localStorage.getItem('platform_users');
+        if (!rawData) {
+            console.log('⚠️ platform_users не найдено в localStorage');
+            return [];
+        }
         
-        // Убеждаемся, что все пользователи имеют правильный формат
+        let users = [];
+        try {
+            users = JSON.parse(rawData);
+        } catch (e) {
+            console.error('❌ Ошибка парсинга platform_users:', e);
+            return [];
+        }
+        
+        console.log('📖 Получение пользователей из localStorage:', users.length, 'пользователей');
+        console.log('📋 Все пользователи:', users.map(u => ({
+            id: u.id,
+            email: u.email,
+            role: u.role,
+            passwordLength: u.password ? u.password.length : 0,
+            hasPassword: !!u.password
+        })));
+        
+        // ВАЖНО: Нормализуем данные БЕЗ изменения паролей существующих пользователей
+        // Только добавляем пароли если их нет, но НЕ перезаписываем существующие
         const normalizedUsers = users.map(user => {
-            // Убеждаемся, что есть все необходимые поля
-            if (!user.email) user.email = user.username || 'admin';
+            // Создаем новый объект, чтобы не изменять оригинал
+            const normalized = { ...user };
             
-            // ВАЖНО: Если пароль пустой или отсутствует, генерируем из email
-            if (!user.password || user.password.trim() === '') {
-                const normalizedEmail = (user.email || '').trim().toLowerCase();
-                user.password = normalizedEmail.substring(0, 6) + '123';
-                console.warn('⚠️ Пользователь без пароля, сгенерирован из email:', normalizedEmail, '→', user.password);
+            // Убеждаемся, что есть все необходимые поля
+            if (!normalized.email) normalized.email = normalized.username || 'admin';
+            
+            // Нормализуем email
+            normalized.email = (normalized.email || '').trim().toLowerCase();
+            
+            // ВАЖНО: Сохраняем существующий пароль как есть, только нормализуем пробелы
+            if (normalized.password) {
+                normalized.password = normalized.password.trim();
+            } else {
+                // Только если пароля нет вообще, генерируем из email
+                normalized.password = normalized.email.substring(0, 6) + '123';
+                console.warn('⚠️ Пользователь без пароля, сгенерирован из email:', normalized.email, '→', normalized.password);
             }
             
-            if (!user.role) user.role = 'student';
-            if (!user.name) user.name = user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Администратор';
+            if (!normalized.role) normalized.role = 'student';
+            if (!normalized.name) {
+                normalized.name = normalized.role === 'student' ? 'Студент' : 
+                                 normalized.role === 'teacher' ? 'Преподаватель' : 'Администратор';
+            }
             
-            // Нормализуем email и password
-            user.email = (user.email || '').trim().toLowerCase();
-            user.password = (user.password || '').trim();
-            
-            return user;
+            return normalized;
         });
         
-        // Сохраняем нормализованных пользователей обратно, если были изменения
-        const hasChanges = normalizedUsers.some((u, i) => {
+        // Сохраняем нормализованных пользователей обратно ТОЛЬКО если были добавлены пароли
+        // НЕ перезаписываем если все пароли уже были
+        const needsSave = normalizedUsers.some((u, i) => {
             const original = users[i];
-            return !original || u.password !== original.password || u.email !== original.email;
+            // Сохраняем только если добавили пароль или нормализовали email
+            return !original || 
+                   (original.email && original.email !== u.email) ||
+                   (!original.password && u.password);
         });
         
-        if (hasChanges) {
+        if (needsSave) {
             localStorage.setItem('platform_users', JSON.stringify(normalizedUsers));
             console.log('✅ Пользователи нормализованы и сохранены');
         }
         
-        console.log('Нормализованные пользователи:', normalizedUsers.map(u => ({
-            id: u.id,
-            email: u.email,
-            role: u.role,
-            hasPassword: !!u.password && u.password.length > 0
-        })));
-        
+        console.log('✅ Возвращаем нормализованных пользователей:', normalizedUsers.length);
         return normalizedUsers;
     },
 

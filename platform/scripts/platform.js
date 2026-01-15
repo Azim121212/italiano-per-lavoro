@@ -6,33 +6,68 @@ window.addEventListener('DOMContentLoaded', function() {
         // Синхронизируем пользователей из админки
         // ВАЖНО: Убеждаемся, что пользователи из админки доступны на платформе
         try {
-            const platformUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
-            console.log('📋 Синхронизация пользователей. Найдено:', platformUsers.length, 'пользователей');
+            const rawData = localStorage.getItem('platform_users');
+            if (!rawData) {
+                console.warn('⚠️ platform_users не найдено в localStorage');
+                PlatformAPI.syncUsers();
+                return;
+            }
             
-            // Нормализуем всех пользователей
+            const platformUsers = JSON.parse(rawData);
+            console.log('📋 Синхронизация пользователей. Найдено:', platformUsers.length, 'пользователей');
+            console.log('📋 Все пользователи:', platformUsers.map(u => ({
+                id: u.id,
+                email: u.email,
+                role: u.role,
+                passwordLength: u.password ? u.password.length : 0,
+                hasPassword: !!u.password
+            })));
+            
+            // ВАЖНО: Нормализуем БЕЗ изменения существующих паролей
+            // Только добавляем пароли если их нет
             const normalizedUsers = platformUsers.map(user => {
-                const normalizedEmail = (user.email || '').trim().toLowerCase();
-                const password = (user.password || '').trim();
+                const normalized = { ...user };
                 
-                return {
-                    ...user,
-                    email: normalizedEmail,
-                    password: password || normalizedEmail.substring(0, 6) + '123',
-                    role: user.role || 'student',
-                    name: user.name || (user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Администратор')
-                };
+                // Нормализуем email
+                normalized.email = (normalized.email || '').trim().toLowerCase();
+                
+                // Сохраняем существующий пароль, только нормализуем пробелы
+                if (normalized.password) {
+                    normalized.password = normalized.password.trim();
+                } else {
+                    // Только если пароля нет, генерируем
+                    normalized.password = normalized.email.substring(0, 6) + '123';
+                    console.warn('⚠️ Добавлен пароль для пользователя:', normalized.email);
+                }
+                
+                if (!normalized.role) normalized.role = 'student';
+                if (!normalized.name) {
+                    normalized.name = normalized.role === 'student' ? 'Студент' : 
+                                     normalized.role === 'teacher' ? 'Преподаватель' : 'Администратор';
+                }
+                
+                return normalized;
             });
             
-            // Сохраняем нормализованных пользователей
-            if (normalizedUsers.length > 0) {
+            // Сохраняем только если добавили пароли или нормализовали email
+            const needsSave = normalizedUsers.some((u, i) => {
+                const original = platformUsers[i];
+                return !original || 
+                       (original.email && original.email !== u.email) ||
+                       (!original.password && u.password);
+            });
+            
+            if (needsSave) {
                 localStorage.setItem('platform_users', JSON.stringify(normalizedUsers));
                 console.log('✅ Пользователи синхронизированы и нормализованы');
+            } else {
+                console.log('✅ Пользователи уже нормализованы');
             }
             
             // Вызываем syncUsers для дополнительной проверки
             PlatformAPI.syncUsers();
         } catch (error) {
-            console.error('Ошибка при синхронизации пользователей:', error);
+            console.error('❌ Ошибка при синхронизации пользователей:', error);
         }
         
         const currentUser = PlatformAPI.getCurrentUser();
