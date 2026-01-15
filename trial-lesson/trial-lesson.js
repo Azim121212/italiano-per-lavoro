@@ -931,31 +931,12 @@ const TrialLesson = {
 document.addEventListener('DOMContentLoaded', function() {
     TrialLesson.init();
     
-    // Кнопка переключения между видами (для тестирования)
-    const switchBtn = document.createElement('button');
-    switchBtn.id = 'viewSwitchBtn';
-    switchBtn.textContent = '👨‍🏫 Вид преподавателя';
-    switchBtn.className = 'btn btn-secondary';
-    switchBtn.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 1000; padding: 0.75rem 1.5rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);';
-    switchBtn.onclick = () => {
-        const studentView = document.getElementById('studentView');
-        const teacherView = document.getElementById('teacherView');
-        
-        if (studentView.style.display !== 'none') {
-            TrialLesson.switchToTeacher();
-            switchBtn.textContent = '👨‍🎓 Вид студента';
-        } else {
-            TrialLesson.switchToStudent();
-            switchBtn.textContent = '👨‍🏫 Вид преподавателя';
-        }
-    };
-    document.body.appendChild(switchBtn);
-    
-    // Проверяем URL параметры для автоматического переключения вида
+    // Вид преподавателя доступен только через платформу преподавателя
+    // Проверяем URL параметры для автоматического переключения вида (только если вызвано из платформы)
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('view') === 'teacher') {
+        // Разрешаем доступ только если вызвано из платформы
         TrialLesson.switchToTeacher();
-        switchBtn.textContent = '👨‍🎓 Вид студента';
     }
 });
 
