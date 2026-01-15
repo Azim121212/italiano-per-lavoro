@@ -21,28 +21,30 @@ const API = {
     
     // Сброс паролей платформы (кроме админки)
     resetPlatformPasswords() {
-        if (typeof PlatformAPI !== 'undefined') {
-            PlatformAPI.resetAllPasswords();
-        } else {
-            // Если PlatformAPI не загружен, делаем напрямую
-            const users = JSON.parse(localStorage.getItem('platform_users') || '[]');
-            const adminEmails = ['admin@admin.com', 'admin'];
+        const users = JSON.parse(localStorage.getItem('platform_users') || '[]');
+        const adminEmails = ['admin@admin.com', 'admin'];
+        
+        const resetUsers = users.map(u => {
+            const normalizedEmail = (u.email || '').trim().toLowerCase();
+            const isAdmin = adminEmails.includes(normalizedEmail);
             
-            const resetUsers = users.map(u => {
-                const isAdmin = adminEmails.includes((u.email || '').trim().toLowerCase());
-                if (!isAdmin) {
-                    return {
-                        ...u,
-                        password: 'admin',
-                        email: (u.email || '').trim().toLowerCase()
-                    };
-                }
-                return u;
-            });
-            
-            localStorage.setItem('platform_users', JSON.stringify(resetUsers));
-            console.log('✅ Пароли платформы сброшены (кроме админки)');
-        }
+            if (!isAdmin) {
+                // Генерируем пароль из email (первые 6 символов + "123")
+                const newPassword = normalizedEmail.substring(0, 6) + '123';
+                return {
+                    ...u,
+                    password: newPassword,
+                    email: normalizedEmail
+                };
+            }
+            return u;
+        });
+        
+        localStorage.setItem('platform_users', JSON.stringify(resetUsers));
+        console.log('✅ Пароли платформы сброшены (кроме админки)');
+        console.log('Сброшено паролей:', resetUsers.filter(u => !adminEmails.includes((u.email || '').trim().toLowerCase())).length);
+        
+        return resetUsers;
     },
 
     // Авторизация
@@ -180,6 +182,8 @@ const API = {
 
     saveStudent(student) {
         const students = this.getStudents();
+        const isNewStudent = !student.id;
+        
         if (student.id) {
             const index = students.findIndex(s => s.id === student.id);
             students[index] = student;
@@ -188,6 +192,60 @@ const API = {
             students.push(student);
         }
         localStorage.setItem('students', JSON.stringify(students));
+        
+        // При создании нового студента автоматически создаем пользователя платформы
+        if (isNewStudent && student.email) {
+            const platformUsers = this.getPlatformUsers();
+            const normalizedEmail = (student.email || '').trim().toLowerCase();
+            
+            // Проверяем, не существует ли уже пользователь с таким email
+            const existingUser = platformUsers.find(u => 
+                (u.email || '').trim().toLowerCase() === normalizedEmail
+            );
+            
+            if (!existingUser) {
+                // Создаем пользователя платформы для студента
+                // Используем email как логин и генерируем пароль из email (первые 6 символов + "123")
+                const defaultPassword = normalizedEmail.substring(0, 6) + '123';
+                
+                const platformUser = {
+                    id: student.id, // Используем тот же ID что и у студента
+                    name: student.name || 'Студент',
+                    email: normalizedEmail,
+                    password: defaultPassword,
+                    role: 'student',
+                    groupId: student.groupId || null
+                };
+                
+                console.log('Автоматически создан пользователь платформы для студента:', {
+                    email: platformUser.email,
+                    password: platformUser.password,
+                    role: platformUser.role
+                });
+                
+                // Сохраняем через savePlatformUser для правильной нормализации
+                this.savePlatformUser(platformUser);
+            } else {
+                console.log('Пользователь платформы с таким email уже существует:', normalizedEmail);
+            }
+        } else if (student.id && student.email) {
+            // При обновлении студента синхронизируем данные с пользователем платформы
+            const platformUsers = this.getPlatformUsers();
+            const normalizedEmail = (student.email || '').trim().toLowerCase();
+            const existingPlatformUser = platformUsers.find(u => 
+                u.id === student.id || (u.email || '').trim().toLowerCase() === normalizedEmail
+            );
+            
+            if (existingPlatformUser) {
+                // Обновляем данные пользователя платформы
+                existingPlatformUser.name = student.name || existingPlatformUser.name;
+                existingPlatformUser.email = normalizedEmail;
+                existingPlatformUser.groupId = student.groupId || existingPlatformUser.groupId;
+                // Пароль не меняем при обновлении студента
+                this.savePlatformUser(existingPlatformUser);
+            }
+        }
+        
         return student;
     },
 
@@ -304,7 +362,8 @@ const API = {
             console.error('Email обязателен');
             return null;
         }
-        user.email = (user.email || '').trim().toLowerCase();
+        const normalizedEmail = (user.email || '').trim().toLowerCase();
+        user.email = normalizedEmail;
         
         // Обработка пароля - ВАЖНО: всегда сохраняем пароль
         if (user.id) {
@@ -313,17 +372,17 @@ const API = {
             if (existingUser) {
                 // Если пароль не указан или пустой, сохраняем старый пароль
                 if (!user.password || user.password.trim() === '') {
-                    user.password = existingUser.password || 'admin';
-                    console.log('Используется существующий пароль для пользователя:', user.email);
+                    user.password = existingUser.password || normalizedEmail.substring(0, 6) + '123';
+                    console.log('Используется существующий пароль для пользователя:', normalizedEmail);
                 } else {
-                    // Нормализуем новый пароль
+                    // Нормализуем новый пароль - убираем пробелы, но сохраняем как есть
                     user.password = user.password.trim();
-                    console.log('Устанавливается новый пароль для пользователя:', user.email);
+                    console.log('Устанавливается новый пароль для пользователя:', normalizedEmail);
                 }
             } else {
                 // Пользователь не найден, но есть ID - создаем нового
                 if (!user.password || user.password.trim() === '') {
-                    user.password = 'admin';
+                    user.password = normalizedEmail.substring(0, 6) + '123';
                 } else {
                     user.password = user.password.trim();
                 }
@@ -331,7 +390,8 @@ const API = {
         } else {
             // Создание нового пользователя
             if (!user.password || user.password.trim() === '') {
-                user.password = 'admin';
+                // Генерируем пароль из email (первые 6 символов + "123")
+                user.password = normalizedEmail.substring(0, 6) + '123';
             } else {
                 user.password = user.password.trim();
             }
@@ -339,7 +399,7 @@ const API = {
         
         // Убеждаемся, что пароль не пустой
         if (!user.password || user.password.trim() === '') {
-            user.password = 'admin';
+            user.password = normalizedEmail.substring(0, 6) + '123';
         }
         
         // Убеждаемся, что все обязательные поля есть
@@ -351,81 +411,111 @@ const API = {
             user.name = user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Администратор';
         }
         
-        // Нормализуем все строковые поля
-        user.name = (user.name || '').trim();
-        user.email = (user.email || '').trim().toLowerCase();
-        user.password = (user.password || '').trim();
+        // Нормализуем все строковые поля - ВАЖНО: делаем это один раз в конце
+        const normalizedUser = {
+            ...user,
+            name: (user.name || '').trim(),
+            email: normalizedEmail,
+            password: (user.password || '').trim() // Убираем пробелы, но сохраняем пароль как есть
+        };
         
         console.log('Сохранение пользователя в API:', {
-            id: user.id,
-            email: user.email,
-            password: user.password ? '*** (длина: ' + user.password.length + ')' : 'ПУСТО',
-            role: user.role,
-            name: user.name
+            id: normalizedUser.id,
+            email: normalizedUser.email,
+            password: normalizedUser.password ? '*** (длина: ' + normalizedUser.password.length + ')' : 'ПУСТО',
+            role: normalizedUser.role,
+            name: normalizedUser.name
         });
         
-        if (user.id) {
-            const index = users.findIndex(u => u.id === user.id);
+        if (normalizedUser.id) {
+            const index = users.findIndex(u => u.id === normalizedUser.id);
             if (index >= 0) {
-                // Обновляем существующего пользователя - ВАЖНО: сохраняем все поля, включая пароль
-                const updatedUser = {
+                // Обновляем существующего пользователя - ВАЖНО: полностью заменяем объект для гарантии сохранения всех полей
+                users[index] = {
                     ...users[index],
-                    ...user,
-                    password: user.password // Гарантируем что пароль обновлен
+                    ...normalizedUser,
+                    password: normalizedUser.password // Гарантируем что пароль обновлен
                 };
-                users[index] = updatedUser;
                 console.log('Пользователь обновлен:', {
-                    id: updatedUser.id,
-                    email: updatedUser.email,
-                    password: updatedUser.password ? '***' : 'ПУСТО',
-                    role: updatedUser.role
+                    id: users[index].id,
+                    email: users[index].email,
+                    password: users[index].password ? '*** (длина: ' + users[index].password.length + ')' : 'ПУСТО',
+                    role: users[index].role
                 });
             } else {
                 // ID указан, но пользователь не найден - добавляем как нового
-                if (!user.id) {
-                    user.id = Date.now();
+                if (!normalizedUser.id) {
+                    normalizedUser.id = Date.now();
                 }
-                users.push(user);
-                console.log('Пользователь добавлен (ID был указан, но не найден):', user);
+                users.push(normalizedUser);
+                console.log('Пользователь добавлен (ID был указан, но не найден):', normalizedUser);
             }
         } else {
-            user.id = Date.now();
-            users.push(user);
-            console.log('Новый пользователь добавлен:', user);
+            normalizedUser.id = Date.now();
+            users.push(normalizedUser);
+            console.log('Новый пользователь добавлен:', normalizedUser);
         }
         
-        // Сохраняем в localStorage
-        localStorage.setItem('platform_users', JSON.stringify(users));
-        
-        // Дополнительная проверка: читаем обратно и проверяем
-        const savedUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
-        const savedUser = savedUsers.find(u => 
-            (user.id && u.id === user.id) || 
-            ((u.email || '').trim().toLowerCase() === user.email)
-        );
-        
-        if (savedUser) {
-            console.log('✅ Пользователь успешно сохранен:', {
-                id: savedUser.id,
-                email: savedUser.email,
-                password: savedUser.password ? '*** (длина: ' + savedUser.password.length + ')' : 'ПУСТО',
-                role: savedUser.role,
-                name: savedUser.name
-            });
+        // Сохраняем в localStorage - ВАЖНО: делаем это синхронно и проверяем результат
+        try {
+            localStorage.setItem('platform_users', JSON.stringify(users));
             
-            // Возвращаем нормализованного пользователя
+            // Сразу читаем обратно для проверки
+            const verifyData = localStorage.getItem('platform_users');
+            if (!verifyData) {
+                throw new Error('Данные не были сохранены в localStorage');
+            }
+            
+            const savedUsers = JSON.parse(verifyData);
+            const savedUser = savedUsers.find(u => 
+                (normalizedUser.id && u.id === normalizedUser.id) || 
+                ((u.email || '').trim().toLowerCase() === normalizedEmail)
+            );
+            
+            if (savedUser) {
+                // Проверяем что пароль действительно сохранен
+                if (!savedUser.password || savedUser.password.trim() === '') {
+                    console.warn('⚠️ Пароль пустой после сохранения, восстанавливаем');
+                    savedUser.password = normalizedUser.password;
+                    const index = savedUsers.findIndex(u => 
+                        (normalizedUser.id && u.id === normalizedUser.id) || 
+                        ((u.email || '').trim().toLowerCase() === normalizedEmail)
+                    );
+                    if (index >= 0) {
+                        savedUsers[index] = savedUser;
+                        localStorage.setItem('platform_users', JSON.stringify(savedUsers));
+                    }
+                }
+                
+                console.log('✅ Пользователь успешно сохранен:', {
+                    id: savedUser.id,
+                    email: savedUser.email,
+                    password: savedUser.password ? '*** (длина: ' + savedUser.password.length + ')' : 'ПУСТО',
+                    role: savedUser.role,
+                    name: savedUser.name
+                });
+                
+                // Возвращаем нормализованного пользователя
+                return {
+                    ...savedUser,
+                    email: (savedUser.email || '').trim().toLowerCase(),
+                    password: (savedUser.password || '').trim()
+                };
+            } else {
+                console.error('❌ Ошибка: пользователь не найден после сохранения в localStorage');
+                // Возвращаем нормализованного пользователя
+                return {
+                    ...normalizedUser,
+                    email: normalizedEmail,
+                    password: normalizedUser.password
+                };
+            }
+        } catch (error) {
+            console.error('❌ Ошибка при сохранении в localStorage:', error);
             return {
-                ...savedUser,
-                email: (savedUser.email || '').trim().toLowerCase(),
-                password: (savedUser.password || '').trim()
-            };
-        } else {
-            console.error('❌ Ошибка: пользователь не найден после сохранения в localStorage');
-            // Возвращаем нормализованного пользователя
-            return {
-                ...user,
-                email: user.email,
-                password: user.password
+                ...normalizedUser,
+                email: normalizedEmail,
+                password: normalizedUser.password
             };
         }
     },
@@ -468,4 +558,20 @@ window.resetAdminPasswords = function() {
     API.resetAllPasswords();
     console.log('✅ Пароли админ-панели сброшены! Используйте: admin / admin');
 };
+
+// Экспорт функции сброса паролей платформы
+window.resetPlatformPasswords = function() {
+    const resetUsers = API.resetPlatformPasswords();
+    const resetCount = resetUsers.filter(u => {
+        const adminEmails = ['admin@admin.com', 'admin'];
+        return !adminEmails.includes((u.email || '').trim().toLowerCase());
+    }).length;
+    console.log(`✅ Пароли платформы сброшены! Сброшено паролей: ${resetCount}`);
+    console.log('Новые пароли: первые 6 символов email + "123"');
+    return resetUsers;
+};
+
+// Автоматический сброс всех паролей кроме админки при загрузке (если нужно)
+// Раскомментируйте следующую строку для автоматического сброса при загрузке страницы:
+// window.addEventListener('DOMContentLoaded', () => { API.resetPlatformPasswords(); });
 

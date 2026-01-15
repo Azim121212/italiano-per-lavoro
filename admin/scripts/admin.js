@@ -83,9 +83,13 @@ function initLogin() {
     resetBtn.style.marginTop = '1rem';
     resetBtn.textContent = 'Сбросить все пароли';
     resetBtn.onclick = function() {
-        if (confirm('Вы уверены? Все пароли платформы будут сброшены на admin/admin (кроме админки)')) {
-            API.resetPlatformPasswords();
-            alert('Пароли платформы сброшены (кроме админки)! Теперь используйте:\nЛогин: email пользователя\nПароль: admin');
+        if (confirm('Вы уверены? Все пароли платформы будут сброшены (кроме админки). Пароли будут установлены как: первые 6 символов email + "123"')) {
+            const resetUsers = API.resetPlatformPasswords();
+            const resetCount = resetUsers.filter(u => {
+                const adminEmails = ['admin@admin.com', 'admin'];
+                return !adminEmails.includes((u.email || '').trim().toLowerCase());
+            }).length;
+            alert(`✅ Пароли платформы сброшены (кроме админки)!\n\nСброшено паролей: ${resetCount}\n\nНовые пароли: первые 6 символов email + "123"\nНапример: email "student@example.com" → пароль "studen123"`);
         }
     };
     loginForm.appendChild(resetBtn);
@@ -716,9 +720,26 @@ function saveStudent() {
     if (student.groupId) student.groupId = parseInt(student.groupId);
     if (student.id) student.id = parseInt(student.id);
     
-    API.saveStudent(student);
+    const isNewStudent = !student.id;
+    const savedStudent = API.saveStudent(student);
+    
+    // Если создан новый студент, показываем данные для входа на платформу
+    if (isNewStudent && savedStudent.email) {
+        const platformUsers = API.getPlatformUsers();
+        const normalizedEmail = (savedStudent.email || '').trim().toLowerCase();
+        const platformUser = platformUsers.find(u => 
+            u.id === savedStudent.id || (u.email || '').trim().toLowerCase() === normalizedEmail
+        );
+        
+        if (platformUser) {
+            const loginPassword = platformUser.password || normalizedEmail.substring(0, 6) + '123';
+            alert(`Студент "${savedStudent.name}" успешно создан!\n\nДанные для входа на платформу обучения:\nEmail: ${normalizedEmail}\nПароль: ${loginPassword}\n\nСохраните эти данные для входа на платформу обучения.`);
+        }
+    }
+    
     closeModal();
     loadStudents();
+    loadPlatformUsers(); // Обновляем список пользователей платформы
     loadDashboard();
 }
 
@@ -1198,13 +1219,19 @@ function savePlatformUser() {
     }
     
     // Обработка пароля - ВАЖНО: всегда нормализуем
+    // Генерируем пароль из email (первые 6 символов + "123") если не указан
+    const generatePasswordFromEmail = (email) => {
+        const normalizedEmail = (email || '').trim().toLowerCase();
+        return normalizedEmail.substring(0, 6) + '123';
+    };
+    
     if (user.id) {
         // Редактирование существующего пользователя
         const existingUser = API.getPlatformUser(user.id);
         if (existingUser) {
             // Если пароль не указан или пустой, сохраняем старый пароль
             if (!user.password || user.password.trim() === '') {
-                user.password = existingUser.password || 'admin';
+                user.password = existingUser.password || generatePasswordFromEmail(user.email);
                 console.log('Используется существующий пароль для пользователя:', user.email);
             } else {
                 // Нормализуем новый пароль
@@ -1214,7 +1241,7 @@ function savePlatformUser() {
         } else {
             // Если пользователь не найден, но есть ID, создаем нового
             if (!user.password || user.password.trim() === '') {
-                user.password = 'admin';
+                user.password = generatePasswordFromEmail(user.email);
             } else {
                 user.password = user.password.trim();
             }
@@ -1222,8 +1249,8 @@ function savePlatformUser() {
     } else {
         // Создание нового пользователя
         if (!user.password || user.password.trim() === '') {
-            user.password = 'admin';
-            console.log('Используется пароль по умолчанию: admin для нового пользователя:', user.email);
+            user.password = generatePasswordFromEmail(user.email);
+            console.log('Используется сгенерированный пароль для нового пользователя:', user.email, '→', user.password);
         } else {
             user.password = user.password.trim();
             console.log('Используется указанный пароль для нового пользователя:', user.email);
@@ -1232,8 +1259,8 @@ function savePlatformUser() {
     
     // Финальная проверка: убеждаемся, что пароль не пустой
     if (!user.password || user.password.trim() === '') {
-        user.password = 'admin';
-        console.warn('Пароль был пустым, установлен "admin" по умолчанию');
+        user.password = generatePasswordFromEmail(user.email);
+        console.warn('Пароль был пустым, сгенерирован из email');
     }
     
     // Нормализуем все строковые поля перед сохранением
@@ -1268,8 +1295,12 @@ function savePlatformUser() {
     
     // Финальная проверка пароля перед сохранением
     if (!user.password || user.password.trim() === '') {
-        console.warn('Пароль все еще пустой, устанавливаем "admin"');
-        user.password = 'admin';
+        const generatePasswordFromEmail = (email) => {
+            const normalizedEmail = (email || '').trim().toLowerCase();
+            return normalizedEmail.substring(0, 6) + '123';
+        };
+        user.password = generatePasswordFromEmail(user.email);
+        console.warn('Пароль все еще пустой, сгенерирован из email');
     }
     
     console.log('Сохранение пользователя с данными:', {

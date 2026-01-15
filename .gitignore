@@ -22,18 +22,30 @@ Desktop.ini
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+*.zip
+
+# Sensitive files
+ssh-key.txt
+*.pem
+*.key
+.env
+.env.local
 
 # Temporary files
 *.tmp
 *.temp
-.cache/
+tmp/
+temp/
 
-# Environment variables
-.env
-.env.local
-
-# Node modules (если будете использовать)
-node_modules/
-package-lock.json
-yarn.lock
+# Cloudflare
+.wrangler/
+.dev.vars

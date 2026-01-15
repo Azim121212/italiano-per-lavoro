@@ -1,6 +1,6 @@
 // API для платформы обучения
 const PlatformAPI = {
-    // Сброс всех паролей на admin/admin (кроме админки)
+    // Сброс всех паролей (кроме админки)
     resetAllPasswords() {
         const users = this.getUsers();
         
@@ -12,12 +12,16 @@ const PlatformAPI = {
         
         // Сбрасываем пароли всех пользователей кроме админа
         const resetUsers = users.map(u => {
+            const normalizedEmail = (u.email || '').trim().toLowerCase();
             const isAdmin = adminUsers.some(admin => admin.id === u.id);
+            
             if (!isAdmin) {
+                // Генерируем пароль из email (первые 6 символов + "123")
+                const newPassword = normalizedEmail.substring(0, 6) + '123';
                 return {
                     ...u,
-                    password: 'admin',
-                    email: (u.email || '').trim().toLowerCase()
+                    password: newPassword,
+                    email: normalizedEmail
                 };
             }
             return u;
@@ -35,8 +39,16 @@ const PlatformAPI = {
         }
         
         localStorage.setItem('platform_users', JSON.stringify(resetUsers));
-        console.log('✅ Пароли платформы сброшены (кроме админки). Используйте admin/admin для входа.');
-        console.log('Сброшено паролей:', resetUsers.length - adminUsers.length);
+        const resetCount = resetUsers.filter(u => {
+            const adminEmails = ['admin@admin.com', 'admin'];
+            return !adminEmails.includes((u.email || '').trim().toLowerCase());
+        }).length;
+        
+        console.log('✅ Пароли платформы сброшены (кроме админки)');
+        console.log('Сброшено паролей:', resetCount);
+        console.log('Новые пароли: первые 6 символов email + "123"');
+        
+        return resetUsers;
     },
     
     // Проверка и синхронизация пользователей
