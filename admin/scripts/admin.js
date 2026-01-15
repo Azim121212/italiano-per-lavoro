@@ -83,12 +83,9 @@ function initLogin() {
     resetBtn.style.marginTop = '1rem';
     resetBtn.textContent = 'Сбросить все пароли';
     resetBtn.onclick = function() {
-        if (confirm('Вы уверены? Все пароли будут сброшены на admin/admin')) {
-            API.resetAllPasswords();
-            if (typeof PlatformAPI !== 'undefined') {
-                PlatformAPI.resetAllPasswords();
-            }
-            alert('Пароли сброшены! Теперь используйте:\nЛогин: admin\nПароль: admin');
+        if (confirm('Вы уверены? Все пароли платформы будут сброшены на admin/admin (кроме админки)')) {
+            API.resetPlatformPasswords();
+            alert('Пароли платформы сброшены (кроме админки)! Теперь используйте:\nЛогин: email пользователя\nПароль: admin');
         }
     };
     loginForm.appendChild(resetBtn);
@@ -1200,38 +1197,49 @@ function savePlatformUser() {
         return;
     }
     
-    // Обработка пароля
+    // Обработка пароля - ВАЖНО: всегда нормализуем
     if (user.id) {
         // Редактирование существующего пользователя
         const existingUser = API.getPlatformUser(user.id);
         if (existingUser) {
             // Если пароль не указан или пустой, сохраняем старый пароль
-            if (!user.password || user.password === '') {
+            if (!user.password || user.password.trim() === '') {
                 user.password = existingUser.password || 'admin';
-                console.log('Используется старый пароль');
+                console.log('Используется существующий пароль для пользователя:', user.email);
             } else {
-                console.log('Используется новый пароль');
+                // Нормализуем новый пароль
+                user.password = user.password.trim();
+                console.log('Устанавливается новый пароль для пользователя:', user.email);
             }
         } else {
             // Если пользователь не найден, но есть ID, создаем нового
-            if (!user.password || user.password === '') {
+            if (!user.password || user.password.trim() === '') {
                 user.password = 'admin';
+            } else {
+                user.password = user.password.trim();
             }
         }
     } else {
         // Создание нового пользователя
-        if (!user.password || user.password === '') {
+        if (!user.password || user.password.trim() === '') {
             user.password = 'admin';
-            console.log('Используется пароль по умолчанию: admin');
+            console.log('Используется пароль по умолчанию: admin для нового пользователя:', user.email);
         } else {
-            console.log('Используется указанный пароль');
+            user.password = user.password.trim();
+            console.log('Используется указанный пароль для нового пользователя:', user.email);
         }
     }
     
-    // Убеждаемся, что пароль не пустой
+    // Финальная проверка: убеждаемся, что пароль не пустой
     if (!user.password || user.password.trim() === '') {
         user.password = 'admin';
+        console.warn('Пароль был пустым, установлен "admin" по умолчанию');
     }
+    
+    // Нормализуем все строковые поля перед сохранением
+    user.email = (user.email || '').trim().toLowerCase();
+    user.password = (user.password || '').trim();
+    user.name = (user.name || '').trim();
     
     // Устанавливаем groupId в зависимости от роли
     if (user.role === 'student') {

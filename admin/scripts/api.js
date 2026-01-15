@@ -1,11 +1,9 @@
 // API для работы с данными (используем localStorage для демо)
 const API = {
-    // Сброс всех паролей на admin/admin
+    // Сброс всех паролей на admin/admin (только админка, платформа не трогается)
     resetAllPasswords() {
-        // Очищаем старые данные
+        // Очищаем старые данные админки
         localStorage.removeItem('admin_users');
-        localStorage.removeItem('platform_users');
-        localStorage.removeItem('platform_user');
         localStorage.removeItem('current_user');
         
         // Создаем нового администратора
@@ -18,7 +16,33 @@ const API = {
         };
         localStorage.setItem('admin_users', JSON.stringify([defaultAdmin]));
         
-        console.log('Пароли сброшены. Используйте admin/admin для входа.');
+        console.log('Пароли админки сброшены. Используйте admin/admin для входа.');
+    },
+    
+    // Сброс паролей платформы (кроме админки)
+    resetPlatformPasswords() {
+        if (typeof PlatformAPI !== 'undefined') {
+            PlatformAPI.resetAllPasswords();
+        } else {
+            // Если PlatformAPI не загружен, делаем напрямую
+            const users = JSON.parse(localStorage.getItem('platform_users') || '[]');
+            const adminEmails = ['admin@admin.com', 'admin'];
+            
+            const resetUsers = users.map(u => {
+                const isAdmin = adminEmails.includes((u.email || '').trim().toLowerCase());
+                if (!isAdmin) {
+                    return {
+                        ...u,
+                        password: 'admin',
+                        email: (u.email || '').trim().toLowerCase()
+                    };
+                }
+                return u;
+            });
+            
+            localStorage.setItem('platform_users', JSON.stringify(resetUsers));
+            console.log('✅ Пароли платформы сброшены (кроме админки)');
+        }
     },
 
     // Авторизация
@@ -275,18 +299,50 @@ const API = {
     savePlatformUser(user) {
         const users = this.getPlatformUsers();
         
-        // Убеждаемся, что пароль сохранен
-        if (!user.password || user.password.trim() === '') {
-            console.warn('Пароль пустой, устанавливаем "admin" по умолчанию');
-            user.password = 'admin';
-        }
-        
-        // Убеждаемся, что все обязательные поля есть
+        // Нормализуем email сразу
         if (!user.email) {
             console.error('Email обязателен');
             return null;
         }
+        user.email = (user.email || '').trim().toLowerCase();
         
+        // Обработка пароля - ВАЖНО: всегда сохраняем пароль
+        if (user.id) {
+            // Редактирование существующего пользователя
+            const existingUser = users.find(u => u.id === user.id);
+            if (existingUser) {
+                // Если пароль не указан или пустой, сохраняем старый пароль
+                if (!user.password || user.password.trim() === '') {
+                    user.password = existingUser.password || 'admin';
+                    console.log('Используется существующий пароль для пользователя:', user.email);
+                } else {
+                    // Нормализуем новый пароль
+                    user.password = user.password.trim();
+                    console.log('Устанавливается новый пароль для пользователя:', user.email);
+                }
+            } else {
+                // Пользователь не найден, но есть ID - создаем нового
+                if (!user.password || user.password.trim() === '') {
+                    user.password = 'admin';
+                } else {
+                    user.password = user.password.trim();
+                }
+            }
+        } else {
+            // Создание нового пользователя
+            if (!user.password || user.password.trim() === '') {
+                user.password = 'admin';
+            } else {
+                user.password = user.password.trim();
+            }
+        }
+        
+        // Убеждаемся, что пароль не пустой
+        if (!user.password || user.password.trim() === '') {
+            user.password = 'admin';
+        }
+        
+        // Убеждаемся, что все обязательные поля есть
         if (!user.role) {
             user.role = 'student';
         }
@@ -295,21 +351,40 @@ const API = {
             user.name = user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Администратор';
         }
         
+        // Нормализуем все строковые поля
+        user.name = (user.name || '').trim();
+        user.email = (user.email || '').trim().toLowerCase();
+        user.password = (user.password || '').trim();
+        
         console.log('Сохранение пользователя в API:', {
             id: user.id,
             email: user.email,
-            password: user.password ? '***' : 'ПУСТО',
-            role: user.role
+            password: user.password ? '*** (длина: ' + user.password.length + ')' : 'ПУСТО',
+            role: user.role,
+            name: user.name
         });
         
         if (user.id) {
             const index = users.findIndex(u => u.id === user.id);
             if (index >= 0) {
-                // Обновляем существующего пользователя, сохраняя все поля
-                users[index] = { ...users[index], ...user };
-                console.log('Пользователь обновлен:', users[index]);
+                // Обновляем существующего пользователя - ВАЖНО: сохраняем все поля, включая пароль
+                const updatedUser = {
+                    ...users[index],
+                    ...user,
+                    password: user.password // Гарантируем что пароль обновлен
+                };
+                users[index] = updatedUser;
+                console.log('Пользователь обновлен:', {
+                    id: updatedUser.id,
+                    email: updatedUser.email,
+                    password: updatedUser.password ? '***' : 'ПУСТО',
+                    role: updatedUser.role
+                });
             } else {
                 // ID указан, но пользователь не найден - добавляем как нового
+                if (!user.id) {
+                    user.id = Date.now();
+                }
                 users.push(user);
                 console.log('Пользователь добавлен (ID был указан, но не найден):', user);
             }
@@ -319,26 +394,39 @@ const API = {
             console.log('Новый пользователь добавлен:', user);
         }
         
+        // Сохраняем в localStorage
         localStorage.setItem('platform_users', JSON.stringify(users));
         
-        // Проверяем, что данные действительно сохранены
+        // Дополнительная проверка: читаем обратно и проверяем
         const savedUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
         const savedUser = savedUsers.find(u => 
             (user.id && u.id === user.id) || 
-            ((u.email || '').trim().toLowerCase() === (user.email || '').trim().toLowerCase())
+            ((u.email || '').trim().toLowerCase() === user.email)
         );
         
         if (savedUser) {
-            console.log('Проверка сохранения: пользователь найден в localStorage:', {
+            console.log('✅ Пользователь успешно сохранен:', {
                 id: savedUser.id,
                 email: savedUser.email,
-                password: savedUser.password ? '***' : 'ПУСТО',
-                role: savedUser.role
+                password: savedUser.password ? '*** (длина: ' + savedUser.password.length + ')' : 'ПУСТО',
+                role: savedUser.role,
+                name: savedUser.name
             });
-            return savedUser;
+            
+            // Возвращаем нормализованного пользователя
+            return {
+                ...savedUser,
+                email: (savedUser.email || '').trim().toLowerCase(),
+                password: (savedUser.password || '').trim()
+            };
         } else {
-            console.error('Ошибка: пользователь не найден после сохранения в localStorage');
-            return user;
+            console.error('❌ Ошибка: пользователь не найден после сохранения в localStorage');
+            // Возвращаем нормализованного пользователя
+            return {
+                ...user,
+                email: user.email,
+                password: user.password
+            };
         }
     },
 

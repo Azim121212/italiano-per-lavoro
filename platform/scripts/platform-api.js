@@ -1,14 +1,42 @@
 // API для платформы обучения
 const PlatformAPI = {
-    // Сброс всех паролей на admin/admin
+    // Сброс всех паролей на admin/admin (кроме админки)
     resetAllPasswords() {
-        // Очищаем старые данные
-        localStorage.removeItem('platform_users');
-        localStorage.removeItem('platform_user');
+        const users = this.getUsers();
         
-        // Создаем новых пользователей с admin/admin
-        this.createDemoUsers();
-        console.log('Пароли платформы сброшены. Используйте admin/admin для входа.');
+        // Сохраняем админа если он есть
+        const adminUsers = users.filter(u => {
+            const adminEmails = ['admin@admin.com', 'admin'];
+            return adminEmails.includes((u.email || '').trim().toLowerCase());
+        });
+        
+        // Сбрасываем пароли всех пользователей кроме админа
+        const resetUsers = users.map(u => {
+            const isAdmin = adminUsers.some(admin => admin.id === u.id);
+            if (!isAdmin) {
+                return {
+                    ...u,
+                    password: 'admin',
+                    email: (u.email || '').trim().toLowerCase()
+                };
+            }
+            return u;
+        });
+        
+        // Если админа нет, создаем его
+        if (adminUsers.length === 0) {
+            resetUsers.push({
+                id: Date.now(),
+                email: 'admin',
+                password: 'admin',
+                role: 'admin',
+                name: 'Администратор'
+            });
+        }
+        
+        localStorage.setItem('platform_users', JSON.stringify(resetUsers));
+        console.log('✅ Пароли платформы сброшены (кроме админки). Используйте admin/admin для входа.');
+        console.log('Сброшено паролей:', resetUsers.length - adminUsers.length);
     },
     
     // Проверка и синхронизация пользователей
@@ -24,26 +52,62 @@ const PlatformAPI = {
         // Они должны создаваться только при первой инициализации данных
         let users = this.getUsers();
         
-        console.log('Попытка входа:', { email, password, role });
+        // Нормализуем входные данные
+        email = (email || '').trim().toLowerCase();
+        password = (password || '').trim();
+        
+        console.log('Попытка входа:', { 
+            email, 
+            password: password ? '*** (длина: ' + password.length + ')' : 'ПУСТО', 
+            role 
+        });
         console.log('Доступные пользователи:', users.length, 'пользователей');
         
-        // Нормализуем email (убираем пробелы, приводим к нижнему регистру)
-        email = email.trim().toLowerCase();
-        password = password.trim();
-        
         // Обычная проверка - ищем пользователя с совпадающими данными
+        // ВАЖНО: сравниваем нормализованные значения
         let user = users.find(u => {
             const userEmail = (u.email || '').trim().toLowerCase();
             const userPassword = (u.password || '').trim();
-            return userEmail === email && 
-                   userPassword === password && 
-                   u.role === role;
+            const userRole = u.role || 'student';
+            
+            const emailMatch = userEmail === email;
+            const passwordMatch = userPassword === password;
+            const roleMatch = userRole === role;
+            
+            if (emailMatch && !passwordMatch) {
+                console.warn('Email найден, но пароль не совпадает:', {
+                    email: userEmail,
+                    введенный_пароль: password ? '***' : 'ПУСТО',
+                    сохраненный_пароль: userPassword ? '*** (длина: ' + userPassword.length + ')' : 'ПУСТО'
+                });
+            }
+            
+            if (emailMatch && passwordMatch && !roleMatch) {
+                console.warn('Email и пароль совпадают, но роль не совпадает:', {
+                    email: userEmail,
+                    введенная_роль: role,
+                    сохраненная_роль: userRole
+                });
+            }
+            
+            return emailMatch && passwordMatch && roleMatch;
         });
         
         if (user) {
-            console.log('Пользователь найден:', user);
-            localStorage.setItem('platform_user', JSON.stringify(user));
-            return user;
+            console.log('✅ Пользователь найден и авторизован:', {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                name: user.name
+            });
+            // Сохраняем нормализованного пользователя
+            const normalizedUser = {
+                ...user,
+                email: (user.email || '').trim().toLowerCase(),
+                password: (user.password || '').trim()
+            };
+            localStorage.setItem('platform_user', JSON.stringify(normalizedUser));
+            return normalizedUser;
         }
         
         // Если не найден, но пытаемся войти как admin/admin, создаем пользователя
@@ -934,7 +998,8 @@ window.PlatformAPI = PlatformAPI;
 // Экспорт функции сброса для ручного использования из консоли
 window.resetPlatformPasswords = function() {
     PlatformAPI.resetAllPasswords();
-    console.log('✅ Пароли платформы обучения сброшены! Используйте: admin / admin');
+    console.log('✅ Пароли платформы обучения сброшены (кроме админки)! Используйте: admin / admin');
+    alert('Пароли платформы сброшены (кроме админки)! Перезагрузите страницу (F5)');
 };
 
 // Функция для полного сброса всех паролей
