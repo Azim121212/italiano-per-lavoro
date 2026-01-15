@@ -3,8 +3,37 @@
 window.addEventListener('DOMContentLoaded', function() {
     // Небольшая задержка, чтобы убедиться, что все скрипты загружены
     setTimeout(function() {
-        // Синхронизируем пользователей (не перезаписываем существующих)
-        PlatformAPI.syncUsers();
+        // Синхронизируем пользователей из админки
+        // ВАЖНО: Убеждаемся, что пользователи из админки доступны на платформе
+        try {
+            const platformUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
+            console.log('📋 Синхронизация пользователей. Найдено:', platformUsers.length, 'пользователей');
+            
+            // Нормализуем всех пользователей
+            const normalizedUsers = platformUsers.map(user => {
+                const normalizedEmail = (user.email || '').trim().toLowerCase();
+                const password = (user.password || '').trim();
+                
+                return {
+                    ...user,
+                    email: normalizedEmail,
+                    password: password || normalizedEmail.substring(0, 6) + '123',
+                    role: user.role || 'student',
+                    name: user.name || (user.role === 'student' ? 'Студент' : user.role === 'teacher' ? 'Преподаватель' : 'Администратор')
+                };
+            });
+            
+            // Сохраняем нормализованных пользователей
+            if (normalizedUsers.length > 0) {
+                localStorage.setItem('platform_users', JSON.stringify(normalizedUsers));
+                console.log('✅ Пользователи синхронизированы и нормализованы');
+            }
+            
+            // Вызываем syncUsers для дополнительной проверки
+            PlatformAPI.syncUsers();
+        } catch (error) {
+            console.error('Ошибка при синхронизации пользователей:', error);
+        }
         
         const currentUser = PlatformAPI.getCurrentUser();
         
@@ -165,14 +194,40 @@ function initLogin() {
                 StateManager.remove('form_loginForm');
             }
         } else {
-            // Получаем список пользователей для более информативного сообщения
-            const allUsers = PlatformAPI.getUsers();
-            const userWithEmail = allUsers.find(u => (u.email || '').trim().toLowerCase() === email.trim().toLowerCase());
-            
-            if (userWithEmail) {
-                showError(`Неверный пароль или роль для ${email}. Проверьте пароль и выбранную роль (${userWithEmail.role}).`);
+            // Обрабатываем детальную информацию об ошибке
+            if (user && user.error) {
+                if (user.error === 'user_not_found') {
+                    const allUsers = PlatformAPI.getUsers();
+                    const usersList = allUsers.length > 0 
+                        ? allUsers.map(u => `${u.email} (${u.role || 'student'})`).join(', ')
+                        : 'нет пользователей';
+                    
+                    showError(`Пользователь с email ${email} не найден.\n\nДоступные пользователи: ${usersList}\n\nСоздайте пользователя в админ-панели: /admin/`);
+                } else if (user.error === 'auth_failed') {
+                    if (!user.passwordMatch) {
+                        showError(`Неверный пароль для ${email}.\n\nПроверьте пароль или сбросьте его в админ-панели.`);
+                    } else if (user.correctRole !== role) {
+                        showError(`Неверная роль для ${email}.\n\nИспользуйте роль: ${user.correctRole}\n\nТекущая роль пользователя: ${user.correctRole}`);
+                    } else {
+                        showError(`Ошибка входа для ${email}. Проверьте данные.`);
+                    }
+                } else {
+                    showError(`Ошибка входа. Проверьте email, пароль и роль.`);
+                }
             } else {
-                showError(`Пользователь с email ${email} не найден. Проверьте email или создайте пользователя в админ-панели.`);
+                // Fallback для старых версий API
+                const allUsers = PlatformAPI.getUsers();
+                const userWithEmail = allUsers.find(u => (u.email || '').trim().toLowerCase() === email.trim().toLowerCase());
+                
+                if (userWithEmail) {
+                    showError(`Неверный пароль или роль для ${email}.\n\nПравильная роль: ${userWithEmail.role || 'student'}\n\nПроверьте пароль и выбранную роль.`);
+                } else {
+                    const usersList = allUsers.length > 0 
+                        ? '\n\nДоступные пользователи:\n' + allUsers.map(u => `- ${u.email} (${u.role || 'student'})`).join('\n')
+                        : '\n\nНет пользователей в системе.';
+                    
+                    showError(`Пользователь с email ${email} не найден.${usersList}\n\nСоздайте пользователя в админ-панели: /admin/`);
+                }
             }
         }
     });

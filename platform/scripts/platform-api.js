@@ -77,33 +77,46 @@ const PlatformAPI = {
         
         // Обычная проверка - ищем пользователя с совпадающими данными
         // ВАЖНО: сравниваем нормализованные значения
-        let user = users.find(u => {
+        let user = null;
+        let foundUserByEmail = null;
+        
+        // Сначала ищем пользователя по email
+        foundUserByEmail = users.find(u => {
             const userEmail = (u.email || '').trim().toLowerCase();
-            const userPassword = (u.password || '').trim();
-            const userRole = u.role || 'student';
+            return userEmail === email;
+        });
+        
+        if (foundUserByEmail) {
+            const userEmail = (foundUserByEmail.email || '').trim().toLowerCase();
+            const userPassword = (foundUserByEmail.password || '').trim();
+            const userRole = foundUserByEmail.role || 'student';
             
-            const emailMatch = userEmail === email;
             const passwordMatch = userPassword === password;
             const roleMatch = userRole === role;
             
-            if (emailMatch && !passwordMatch) {
-                console.warn('Email найден, но пароль не совпадает:', {
-                    email: userEmail,
-                    введенный_пароль: password ? '***' : 'ПУСТО',
-                    сохраненный_пароль: userPassword ? '*** (длина: ' + userPassword.length + ')' : 'ПУСТО'
-                });
+            if (passwordMatch && roleMatch) {
+                user = foundUserByEmail;
+            } else {
+                // Логируем детали для отладки
+                if (!passwordMatch) {
+                    console.warn('Email найден, но пароль не совпадает:', {
+                        email: userEmail,
+                        введенный_пароль: password ? '*** (длина: ' + password.length + ')' : 'ПУСТО',
+                        сохраненный_пароль: userPassword ? '*** (длина: ' + userPassword.length + ')' : 'ПУСТО',
+                        сохраненный_пароль_полный: userPassword // Временно для отладки
+                    });
+                }
+                
+                if (passwordMatch && !roleMatch) {
+                    console.warn('Email и пароль совпадают, но роль не совпадает:', {
+                        email: userEmail,
+                        введенная_роль: role,
+                        сохраненная_роль: userRole,
+                        подсказка: `Используйте роль: ${userRole}`
+                    });
+                }
             }
-            
-            if (emailMatch && passwordMatch && !roleMatch) {
-                console.warn('Email и пароль совпадают, но роль не совпадает:', {
-                    email: userEmail,
-                    введенная_роль: role,
-                    сохраненная_роль: userRole
-                });
-            }
-            
-            return emailMatch && passwordMatch && roleMatch;
-        });
+        }
         
         if (user) {
             console.log('✅ Пользователь найден и авторизован:', {
@@ -155,22 +168,44 @@ const PlatformAPI = {
         });
         
         // Показываем подробную информацию для отладки
-        const matchingEmail = users.find(u => (u.email || '').trim().toLowerCase() === email);
-        if (matchingEmail) {
-            console.error('Найден пользователь с таким email, но:', {
+        if (foundUserByEmail) {
+            const matchingEmail = foundUserByEmail;
+            console.error('Найден пользователь с таким email, но вход не удался:', {
                 email: matchingEmail.email,
-                введенный_пароль: password ? '***' : 'ПУСТО',
-                сохраненный_пароль: matchingEmail.password ? '***' : 'ПУСТО',
-                пароли_совпадают: matchingEmail.password === password,
+                введенный_пароль: password ? '*** (длина: ' + password.length + ')' : 'ПУСТО',
+                сохраненный_пароль: matchingEmail.password ? '*** (длина: ' + (matchingEmail.password || '').length + ')' : 'ПУСТО',
+                пароли_совпадают: (matchingEmail.password || '').trim() === password,
                 введенная_роль: role,
-                сохраненная_роль: matchingEmail.role,
-                роли_совпадают: matchingEmail.role === role
+                сохраненная_роль: matchingEmail.role || 'student',
+                роли_совпадают: (matchingEmail.role || 'student') === role,
+                подсказка: `Используйте роль: ${matchingEmail.role || 'student'}`
             });
+            
+            // Возвращаем объект с информацией для более детального сообщения об ошибке
+            return {
+                error: 'auth_failed',
+                email: email,
+                foundUser: true,
+                correctRole: matchingEmail.role || 'student',
+                passwordMatch: (matchingEmail.password || '').trim() === password
+            };
         } else {
-            console.error('Пользователь с таким email не найден. Все доступные email:', users.map(u => u.email));
+            console.error('Пользователь с таким email не найден. Все доступные email:', users.map(u => ({
+                email: u.email,
+                role: u.role || 'student',
+                name: u.name
+            })));
+            
+            return {
+                error: 'user_not_found',
+                email: email,
+                foundUser: false,
+                availableUsers: users.map(u => ({
+                    email: u.email,
+                    role: u.role || 'student'
+                }))
+            };
         }
-        
-        return null;
     },
 
     createDemoUsers() {
