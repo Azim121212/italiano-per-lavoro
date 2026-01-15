@@ -126,6 +126,7 @@
                             <button class="btn btn-primary" id="quickAddStudent">+ Студент</button>
                             <button class="btn btn-primary" id="quickAddGroup">+ Группа</button>
                             <button class="btn btn-primary" id="quickAddCourse">+ Курс</button>
+                            <button class="btn btn-primary" id="quickAddPlatformUser">+ Пользователь</button>
                         </div>
                     </div>
 
@@ -159,6 +160,42 @@
                                 <p>Новых сообщений</p>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Quick Create User Form -->
+                    <div class="dashboard-card" style="margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem;">Быстрое создание пользователя</h3>
+                        <form id="quickUserForm" class="quick-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end;">
+                            <div class="form-group">
+                                <label>Имя</label>
+                                <input type="text" name="name" required placeholder="Имя пользователя">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" required placeholder="email@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Пароль</label>
+                                <input type="password" name="password" placeholder="Автоматически, если пусто">
+                            </div>
+                            <div class="form-group">
+                                <label>Роль</label>
+                                <select name="role" required>
+                                    <option value="student">Студент</option>
+                                    <option value="teacher">Преподаватель</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="quickGroupIdGroup" style="display: none;">
+                                <label>Группа (для студентов)</label>
+                                <select name="groupId">
+                                    <option value="">Не назначена</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block">Создать пользователя</button>
+                            </div>
+                        </form>
+                        <div id="quickUserMessage" style="margin-top: 1rem; display: none;"></div>
                     </div>
 
                     <!-- Notifications -->

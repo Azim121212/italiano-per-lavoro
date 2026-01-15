@@ -366,12 +366,25 @@ function initQuickActions() {
     document.getElementById('quickAddStudent').addEventListener('click', () => showAddStudentModal());
     document.getElementById('quickAddGroup').addEventListener('click', () => showAddGroupModal());
     document.getElementById('quickAddCourse').addEventListener('click', () => showAddCourseModal());
+    document.getElementById('quickAddPlatformUser')?.addEventListener('click', () => {
+        // Прокручиваем к форме создания пользователя
+        const form = document.getElementById('quickUserForm');
+        if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            form.querySelector('input[name="name"]')?.focus();
+        } else {
+            showAddPlatformUserModal();
+        }
+    });
     
     document.getElementById('addCourseBtn').addEventListener('click', () => showAddCourseModal());
     document.getElementById('addGroupBtn').addEventListener('click', () => showAddGroupModal());
     document.getElementById('addStudentBtn').addEventListener('click', () => showAddStudentModal());
     document.getElementById('addReviewBtn').addEventListener('click', () => showAddReviewModal());
     document.getElementById('addPlatformUserBtn')?.addEventListener('click', () => showAddPlatformUserModal());
+    
+    // Инициализация формы быстрого создания пользователя на dashboard
+    initQuickUserForm();
     const platformUserRoleFilter = document.getElementById('platformUserRoleFilter');
     if (platformUserRoleFilter) {
         // Восстанавливаем сохраненный фильтр
@@ -1094,6 +1107,169 @@ function loadPlatformUsers() {
         `;
         tbody.appendChild(row);
     });
+}
+
+// Инициализация формы быстрого создания пользователя на dashboard
+function initQuickUserForm() {
+    const quickForm = document.getElementById('quickUserForm');
+    if (!quickForm) return;
+    
+    const roleSelect = quickForm.querySelector('select[name="role"]');
+    const groupIdGroup = document.getElementById('quickGroupIdGroup');
+    const groupSelect = quickForm.querySelector('select[name="groupId"]');
+    const messageDiv = document.getElementById('quickUserMessage');
+    
+    // Загружаем группы для выбора
+    const groups = API.getGroups();
+    groupSelect.innerHTML = '<option value="">Не назначена</option>' + 
+        groups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+    
+    // Показываем/скрываем поле группы в зависимости от роли
+    if (roleSelect) {
+        roleSelect.addEventListener('change', function() {
+            if (this.value === 'student') {
+                groupIdGroup.style.display = 'block';
+            } else {
+                groupIdGroup.style.display = 'none';
+            }
+        });
+    }
+    
+    // Обработка отправки формы
+    quickForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(quickForm);
+        const user = {
+            name: (formData.get('name') || '').trim(),
+            email: (formData.get('email') || '').trim().toLowerCase(),
+            password: (formData.get('password') || '').trim(),
+            role: formData.get('role') || 'student',
+            groupId: formData.get('groupId') || null,
+            id: null // Новый пользователь
+        };
+        
+        // Валидация
+        if (!user.email) {
+            showQuickUserMessage('Email обязателен для заполнения', 'error');
+            return;
+        }
+        
+        if (!user.name) {
+            showQuickUserMessage('Имя обязательно для заполнения', 'error');
+            return;
+        }
+        
+        // Проверка на существующего пользователя
+        const existingUsers = API.getPlatformUsers();
+        const emailExists = existingUsers.find(u => 
+            (u.email || '').trim().toLowerCase() === user.email
+        );
+        
+        if (emailExists) {
+            showQuickUserMessage('Пользователь с таким email уже существует', 'error');
+            return;
+        }
+        
+        // Генерируем пароль если не указан
+        if (!user.password || user.password.trim() === '') {
+            user.password = user.email.substring(0, 6) + '123';
+        }
+        
+        // Обрабатываем groupId
+        if (user.role === 'student') {
+            if (user.groupId) {
+                user.groupId = parseInt(user.groupId);
+            } else {
+                user.groupId = null;
+            }
+            delete user.groups;
+        } else if (user.role === 'teacher') {
+            delete user.groupId;
+            user.groups = [];
+        }
+        
+        // Сохраняем пользователя
+        console.log('🔄 Быстрое создание пользователя:', user.email);
+        const savedUser = API.savePlatformUser(user);
+        
+        if (!savedUser) {
+            showQuickUserMessage('Ошибка при сохранении пользователя. Проверьте консоль браузера.', 'error');
+            return;
+        }
+        
+        // Проверяем сохранение
+        const allUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
+        const verifyUser = allUsers.find(u => 
+            (u.email || '').trim().toLowerCase() === user.email
+        );
+        
+        if (verifyUser) {
+            const savedPassword = verifyUser.password || user.password;
+            showQuickUserMessage(
+                `✅ Пользователь "${user.name}" успешно создан!\n\nEmail: ${verifyUser.email}\nПароль: ${savedPassword}\nРоль: ${user.role === 'student' ? 'Студент' : 'Преподаватель'}`,
+                'success'
+            );
+            
+            // Очищаем форму
+            quickForm.reset();
+            groupIdGroup.style.display = 'none';
+            
+            // Обновляем dashboard
+            loadDashboard();
+            loadPlatformUsers();
+        } else {
+            // Пытаемся сохранить напрямую
+            const currentUsers = JSON.parse(localStorage.getItem('platform_users') || '[]');
+            const newUser = {
+                ...savedUser,
+                id: savedUser.id || Date.now(),
+                email: user.email,
+                password: savedUser.password || user.password,
+                role: user.role,
+                name: user.name
+            };
+            currentUsers.push(newUser);
+            localStorage.setItem('platform_users', JSON.stringify(currentUsers));
+            
+            const savedPassword = newUser.password;
+            showQuickUserMessage(
+                `✅ Пользователь "${user.name}" успешно создан!\n\nEmail: ${newUser.email}\nПароль: ${savedPassword}\nРоль: ${user.role === 'student' ? 'Студент' : 'Преподаватель'}`,
+                'success'
+            );
+            
+            quickForm.reset();
+            groupIdGroup.style.display = 'none';
+            loadDashboard();
+            loadPlatformUsers();
+        }
+    });
+}
+
+function showQuickUserMessage(message, type) {
+    const messageDiv = document.getElementById('quickUserMessage');
+    if (!messageDiv) return;
+    
+    messageDiv.textContent = message;
+    messageDiv.style.display = 'block';
+    messageDiv.style.padding = '1rem';
+    messageDiv.style.borderRadius = '8px';
+    messageDiv.style.marginTop = '1rem';
+    
+    if (type === 'success') {
+        messageDiv.style.background = '#d4edda';
+        messageDiv.style.color = '#155724';
+        messageDiv.style.border = '1px solid #c3e6cb';
+    } else {
+        messageDiv.style.background = '#f8d7da';
+        messageDiv.style.color = '#721c24';
+        messageDiv.style.border = '1px solid #f5c6cb';
+    }
+    
+    // Автоматически скрываем через 5 секунд
+    setTimeout(() => {
+        messageDiv.style.display = 'none';
+    }, 5000);
 }
 
 function showAddPlatformUserModal(userId = null) {
