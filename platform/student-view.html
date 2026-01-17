@@ -3,46 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Платформа обучения - IL</title>
+    <title>Платформа обучения - Студент (Открытый доступ)</title>
     <link rel="stylesheet" href="styles/platform.css">
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-screen">
-        <div class="login-container">
-            <div class="login-header">
-                <h1>IL Learning Platform</h1>
-                <p>Вход в платформу обучения</p>
-            </div>
-            <form id="loginForm" class="login-form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" name="password" required autocomplete="current-password">
-                </div>
-                <div class="form-group">
-                    <label for="role">Роль</label>
-                    <select id="role" name="role" required>
-                        <option value="">Выберите роль</option>
-                        <option value="student">Студент</option>
-                        <option value="teacher">Преподаватель</option>
-                        <option value="admin">Администратор</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Войти</button>
-                <div id="loginError" class="error-message" style="display: none;"></div>
-            </form>
-            <div class="login-footer">
-                <p>Нет аккаунта? <a href="#" id="registerLink">Зарегистрироваться</a></p>
-            </div>
-        </div>
-    </div>
-
     <!-- Student Dashboard -->
-    <div id="studentDashboard" class="dashboard" style="display: none;">
+    <div id="studentDashboard" class="dashboard">
         <header class="dashboard-header">
             <div class="header-left">
                 <h1>IL Learning Platform</h1>
@@ -53,7 +19,6 @@
                     <span id="studentName">Студент</span>
                     <span class="points-badge" id="studentPoints">0 очков</span>
                 </div>
-                <button class="btn btn-secondary" id="studentLogout">Выйти</button>
             </div>
         </header>
 
@@ -164,91 +129,6 @@
         </div>
     </div>
 
-    <!-- Teacher Dashboard -->
-    <div id="teacherDashboard" class="dashboard" style="display: none;">
-        <header class="dashboard-header">
-            <div class="header-left">
-                <h1>IL Learning Platform</h1>
-                <span class="user-badge teacher">Преподаватель</span>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <span id="teacherName">Преподаватель</span>
-                </div>
-                <button class="btn btn-secondary" id="teacherLogout">Выйти</button>
-            </div>
-        </header>
-
-        <div class="dashboard-container">
-            <aside class="dashboard-sidebar">
-                <nav class="sidebar-nav">
-                    <a href="#groups" class="nav-item active" data-section="groups">
-                        <span class="nav-icon">👥</span>
-                        <span>Мои группы</span>
-                    </a>
-                    <a href="#lessons" class="nav-item" data-section="lessons">
-                        <span class="nav-icon">📝</span>
-                        <span>Уроки</span>
-                    </a>
-                    <a href="../trial-lesson/index.html?view=teacher" class="nav-item" target="_blank">
-                        <span class="nav-icon">🎓</span>
-                        <span>Пробный урок</span>
-                    </a>
-                    <a href="#assignments" class="nav-item" data-section="assignments">
-                        <span class="nav-icon">📋</span>
-                        <span>Задания</span>
-                    </a>
-                    <a href="#statistics" class="nav-item" data-section="statistics">
-                        <span class="nav-icon">📊</span>
-                        <span>Статистика</span>
-                    </a>
-                </nav>
-            </aside>
-
-            <main class="dashboard-content">
-                <!-- Groups Section -->
-                <section id="groupsSection" class="content-section active">
-                    <h2>Мои группы</h2>
-                    <div id="teacherGroups" class="groups-grid">
-                        <!-- Groups will be loaded here -->
-                    </div>
-                </section>
-
-                <!-- Lessons Section -->
-                <section id="lessonsSection" class="content-section">
-                    <div class="section-header">
-                        <h2>Уроки</h2>
-                        <button class="btn btn-primary" id="createLessonBtn">+ Создать урок</button>
-                    </div>
-                    <div id="lessonsList" class="lessons-list">
-                        <!-- Lessons will be loaded here -->
-                    </div>
-                </section>
-
-                <!-- Assignments Section -->
-                <section id="assignmentsSection" class="content-section">
-                    <h2>Задания студентов</h2>
-                    <div id="assignmentsList" class="assignments-list">
-                        <!-- Assignments will be loaded here -->
-                    </div>
-                </section>
-
-                <!-- Statistics Section -->
-                <section id="statisticsSection" class="content-section">
-                    <h2>Статистика группы</h2>
-                    <div id="groupStatistics" class="statistics-content">
-                        <!-- Statistics will be loaded here -->
-                    </div>
-                </section>
-            </main>
-        </div>
-    </div>
-
-    <!-- Admin Dashboard (используем существующую админку) -->
-    <div id="adminDashboard" style="display: none;">
-        <!-- Redirect to admin panel -->
-    </div>
-
     <!-- Modals -->
     <div id="modalOverlay" class="modal-overlay" style="display: none;">
         <div class="modal" id="modal">
@@ -259,8 +139,80 @@
     <script src="../scripts/state-manager.js"></script>
     <script src="scripts/platform-api.js"></script>
     <script src="scripts/student.js"></script>
-    <script src="scripts/teacher.js"></script>
-    <script src="scripts/platform.js"></script>
+    <script>
+        // Автоматическая инициализация демо-пользователя студента при загрузке
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                // Инициализируем демо-данные если их нет
+                if (!localStorage.getItem('platform_courses')) {
+                    PlatformAPI.initDemoData();
+                }
+                
+                // Создаем или получаем демо-пользователя студента
+                let demoStudent = PlatformAPI.getCurrentUser();
+                
+                if (!demoStudent || demoStudent.role !== 'student') {
+                    // Создаем демо-пользователя студента
+                    const users = PlatformAPI.getUsers();
+                    let studentUser = users.find(u => u.role === 'student');
+                    
+                    if (!studentUser) {
+                        // Создаем нового демо-студента
+                        studentUser = {
+                            id: Date.now(),
+                            email: 'demo@student.com',
+                            password: 'demo123',
+                            role: 'student',
+                            name: 'Демо Студент',
+                            groupId: 1
+                        };
+                        
+                        users.push(studentUser);
+                        localStorage.setItem('platform_users', JSON.stringify(users));
+                    }
+                    
+                    // Автоматически авторизуем демо-студента
+                    localStorage.setItem('platform_user', JSON.stringify(studentUser));
+                    demoStudent = studentUser;
+                }
+                
+                // Показываем дашборд студента
+                const studentDashboard = document.getElementById('studentDashboard');
+                if (studentDashboard) {
+                    studentDashboard.style.display = 'flex';
+                    
+                    // Инициализируем дашборд
+                    if (typeof StudentDashboard !== 'undefined' && StudentDashboard.init) {
+                        StudentDashboard.init();
+                    }
+                }
+            }, 100);
+        });
+        
+        // Обработка кнопки "Назад к курсам"
+        document.getElementById('backToCourses')?.addEventListener('click', function() {
+            if (typeof StudentDashboard !== 'undefined' && StudentDashboard.backToCourses) {
+                StudentDashboard.backToCourses();
+            }
+        });
+        
+        // Обработка клика вне модального окна
+        document.getElementById('modalOverlay')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+        
+        // Обработка ESC для закрытия модального окна
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('modalOverlay');
+                if (overlay && overlay.style.display === 'flex') {
+                    overlay.style.display = 'none';
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 
